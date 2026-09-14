@@ -1,0 +1,1720 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.29">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="Документация библиотеки genesis">
+
+<title>20&nbsp; Разработка пользовательских функций – genesis docs</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../pages/480_hybridization.html" rel="next">
+<link href="../pages/465_tools.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-0815c480559380816a4d1ea211a47e91.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-c27fdc8e5b00b532d2d5a75ada188648.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "Поиск не дал результатов",
+    "search-matching-documents-text": "Результаты поиска",
+    "search-copy-link-title": "Скопировать ссылку",
+    "search-hide-matches-text": "Скрыть дополнительные результаты",
+    "search-more-match-text": "дополнительный результат в этом документе",
+    "search-more-matches-text": "дополнительных результата(-ов) в этом документе",
+    "search-clear-button-title": "Очистить",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Отменить",
+    "search-submit-button-title": "Найти",
+    "search-label": "Поиск"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Переключить боковую панель навигации" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../400_for_developers.html">Для Разработчиков</a></li><li class="breadcrumb-item"><a href="../pages/470_custom_classes.html"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Разработка пользовательских функций</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Переключить боковую панель навигации" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Поиск" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">genesis docs</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/Obsidian-pb/genesis" title="Исходный код" class="quarto-navigation-tool px-1" aria-label="Исходный код"><i class="bi bi-github"></i></a>
+    <div class="dropdown">
+      <a href="" title="Download" id="quarto-navigation-tool-dropdown-0" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" role="link" aria-label="Download"><i class="bi bi-download"></i></a>
+      <ul class="dropdown-menu" aria-labelledby="quarto-navigation-tool-dropdown-0">
+          <li>
+            <a class="dropdown-item sidebar-tools-main-item" href="../genesis-docs.pdf">
+              <i class="bi bi-file-pdf pe-1"></i>
+            Download PDF
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item sidebar-tools-main-item" href="../genesis-docs.epub">
+              <i class="bi bi-journal pe-1"></i>
+            Download ePub
+            </a>
+          </li>
+      </ul>
+    </div>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Поиск"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Общие сведения</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/010_installation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Установка</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/020_rapid_start.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Быстрый старт</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../100_tools.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Описание основных библиотек</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Переключить раздел">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/110_what_is_osmnx.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Основные сведения о библиотеке OSMnx</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/120_what_is_geopandas.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Основные сведения о библиотеке GeoPandas</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../200_data_preparation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Подготовка основных типов исходных данных</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Переключить раздел">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/210_data_preparation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Загрузка из OSM</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/220_data_preparation_qgis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Редактирование пространственных данных в QGIS</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../300_for_users.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Для пользователей</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Переключить раздел">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/310_state_modelling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Моделирование параметров прибытия подразделений пожарной охраны</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/320_analize.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Анализ результатов моделирования</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/330_blp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Определение наилучшей дислокации единственного подразделения (BLP)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/340_mclp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Задача определения наилучшей дислокации множества подразделений (MCLP)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/350_lscp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Задача определения количества подразделений при наилучшей дислокации (LSCP)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/360_lscp_package.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Проведение расчетов для нескольких населенных пунктов</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/460_osmosis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Работа с большими массивами данных в Osmosis</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../400_for_developers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Для Разработчиков</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Переключить раздел">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/405_base_classes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Базовые классы</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/410_state_modelling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Моделирование параметров прибытия подразделений пожарной охраны</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/430_blp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Определение наилучшей дислокации единственного подразделения (BLP)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/440_mclp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Задача определения наилучшей дислокации множества подразделений (MCLP)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/450_lscp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Задача определения количества подразделений при наилучшей дислокации (LSCP)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/465_tools.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Инструменты обработки используемые в расчетах</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/470_custom_classes.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Разработка пользовательских функций</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/480_hybridization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Гибридизация алгоритмов</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/910_short.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Сокращения</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/920_terms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Термины и определения</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/930_useful_links.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Полезные ссылки</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/900_references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Ссылки</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../999_discussion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Обсуждение (закрытая часть)</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Содержание</h2>
+   
+  <ul>
+  <li><a href="#пример-реализации-пользовательского-алгоритма-blp" id="toc-пример-реализации-пользовательского-алгоритма-blp" class="nav-link active" data-scroll-target="#пример-реализации-пользовательского-алгоритма-blp"><span class="header-section-number">20.1</span> Пример реализации пользовательского алгоритма BLP</a></li>
+  <li><a href="#пример-реализации-пользовательской-метрики" id="toc-пример-реализации-пользовательской-метрики" class="nav-link" data-scroll-target="#пример-реализации-пользовательской-метрики"><span class="header-section-number">20.2</span> Пример реализации пользовательской метрики</a></li>
+  <li><a href="#модификация-существующего-алгоритма-mclp" id="toc-модификация-существующего-алгоритма-mclp" class="nav-link" data-scroll-target="#модификация-существующего-алгоритма-mclp"><span class="header-section-number">20.3</span> Модификация существующего алгоритма MCLP</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.dev/Obsidian-pb/genesis/blob/main/pages/470_custom_classes.ipynb" class="toc-action"><i class="bi bi-github"></i>Редактировать страницу</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../400_for_developers.html">Для Разработчиков</a></li><li class="breadcrumb-item"><a href="../pages/470_custom_classes.html"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Разработка пользовательских функций</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Разработка пользовательских функций</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>По желанию пользователь может разрабатывать и тестировать новые алгоритмы и функции.</p>
+<p>Для этого необходимо создать класс-функцию наследующую от соответсвующего базового класса-функции (в зависимости от поставленной задачи)</p>
+<p>В Генезис реализованы следующие базовые классы:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Базовый Класс-функция</th>
+<th>Описание</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="../pages/405_base_classes.html#metricbase"><code>MetricBase</code></a></td>
+<td>Метрики</td>
+</tr>
+<tr class="even">
+<td><a href="../pages/405_base_classes.html#statebase"><code>StateBase</code></a></td>
+<td>Состояние</td>
+</tr>
+<tr class="odd">
+<td><a href="../pages/405_base_classes.html#bestpointsbase"><code>BestPointsBase</code></a></td>
+<td>Алгоритм BLP</td>
+</tr>
+<tr class="even">
+<td><a href="../pages/405_base_classes.html#mclpbase"><code>MCLPBase</code></a></td>
+<td>Алгоритм MCLP</td>
+</tr>
+<tr class="odd">
+<td><a href="../pages/405_base_classes.html#stopcasebase"><code>StopCaseBase</code></a></td>
+<td>Функция остановки</td>
+</tr>
+<tr class="even">
+<td><a href="../pages/405_base_classes.html#pointselectorbase"><code>PointSelectorBase</code></a></td>
+<td>Селектор новых узлов</td>
+</tr>
+<tr class="odd">
+<td><a href="../pages/405_base_classes.html#lscpbase"><code>LSCPBase</code></a></td>
+<td>Алгоритм LSCP</td>
+</tr>
+</tbody>
+</table>
+<section id="пример-реализации-пользовательского-алгоритма-blp" class="level2" data-number="20.1">
+<h2 data-number="20.1" class="anchored" data-anchor-id="пример-реализации-пользовательского-алгоритма-blp"><span class="header-section-number">20.1</span> Пример реализации пользовательского алгоритма BLP</h2>
+<p>В качестве примера рассмотри создание алгоритма поиска лучшего узла графа методом рекурсивного деления области на квадраты.</p>
+<p>Логика алгоритма будет следующая:</p>
+<p>Дан граф улично-дорожной сети в формате <code>networkx.MultiDiGraph</code>, веса ребер определены полем <code>travel_time</code> и представляют время следования по участку дороги в минутах.</p>
+<p>Алгоритм:</p>
+<ol type="1">
+<li>Граф проецируется в локальную систему координат при помощи <code>osmnx.project_graph</code></li>
+<li>Определяется основной прямоугольник <code>P</code> в который вписаны все узлы графа</li>
+<li>Основной прямоугольник разбивается на некоторое количество квадратов меньшего размера. Размер стороны квадратов определется как половина наименьшего измерения прямоугольника <code>P</code></li>
+<li>В пределах каждого из меньших квадратов определяется <code>n</code> узлов, для каждого из них при помощи <code>genesis.Best_points.NodeMetric</code> определяется значение метрики времени среднего времени прибытия <code>genesis.metrics.ArrivalTime</code></li>
+<li>Выбирается квадрат в пределах которого находится узел с наилучшей метрикой</li>
+<li>Если в пределах квадрата содержится больше узлов чем некоторое минимальное значение <code>n_min_count</code> задаваемое как гиперпараметр алгоритма, то шаги 4,5,6 повторяются</li>
+<li>Алгоритм возвращает узел с лучшей метрикой</li>
+</ol>
+<p>Алгоритм должен реализован как наследник класса <code>genesis.core.BestPointsBase</code> и реализует соответсвующий интерфейс.</p>
+<p>Подключение необходимых библиотек</p>
+<div id="cell-5" class="cell" data-execution_count="33">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> networkx <span class="im">as</span> nx</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> osmnx <span class="im">as</span> ox</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> geopandas <span class="im">as</span> gpd</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> shapely</span></code><button title="Скопировать текст" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Загрузка исходных данных</p>
+<div id="cell-7" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> graphs.speeds <span class="im">import</span> set_graph_travel_times, kmh_to_mm</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fire_units.settings <span class="im">import</span> DEFAULT_SPEEDS</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Загрузка исходных данных</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">## Загрузка ГДС</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>G <span class="op">=</span> ox.load_graphml(<span class="st">'data/kemerovo/gds.ml'</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">## Установка скоростного режима</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>set_graph_travel_times(</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    G,</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    speeds<span class="op">=</span>DEFAULT_SPEEDS,</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    morph_function <span class="op">=</span> kmh_to_mm)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co">## Упрощение графа (уменьшение количества узлов)</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>G <span class="op">=</span> ox.simplification.simplify_graph(G)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="co">## Загрузка границ населенного пункта</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>borders <span class="op">=</span> gpd.read_file(<span class="st">'data/kemerovo/borders.gpkg'</span>)</span></code><button title="Скопировать текст" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Реализация алгоритма</p>
+<div id="cell-9" class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> random</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> math</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> genesis.core <span class="im">import</span> BestPointsBase, StateBase, MetricBase</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> genesis.best_points <span class="im">import</span> NodeMetric</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> genesis.metrics <span class="im">import</span> ArrivalTime</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> genesis.states <span class="im">import</span> FirstArrivalUnitState</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BestNodeSquareZoom(BestPointsBase):</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">    Поиск лучшего узла графа методом рекурсивного деления области на квадраты.</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">    1. Проекция графа в локальную систему координат.</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co">    2. Определение главного прямоугольника, в который вписаны узлы графа.</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co">    3. Разбиение прямоугольника на квадраты со стороной min(width, height)/2.</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co">    4. В каждом квадрате случайная выборка до n узлов и вычисление метрики.</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co">    5. Выбор квадрата с узлом наилучшей метрики и рекурсия, пока количество узлов в квадрате не &lt;= n_min_count.</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, state_function: StateBase,</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>                metric_function: MetricBase,</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>                n_samples: <span class="bu">int</span> <span class="op">=</span> <span class="dv">10</span>,</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>                n_min_count: <span class="bu">int</span> <span class="op">=</span> <span class="dv">5</span>,</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>                <span class="op">**</span>kwargs):</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="co">        `state_function`: StateBase — функция расчета состояния окружения.</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="co">        `metric_function`: MetricBase — функция расчета метрики.</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="co">        `n_samples`: int — максимальное число узлов для оценки в каждом квадрате.</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="co">        `n_min_count`: int — минимальное число узлов для останова рекурсии.</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="co">        """</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.n_samples <span class="op">=</span> n_samples</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.n_min_count <span class="op">=</span> n_min_count</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>(state_function, metric_function, <span class="op">**</span>kwargs)</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__call__</span>(<span class="va">self</span>, env: nx.Graph,</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>                area<span class="op">=</span><span class="va">None</span>, </span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>                start_point: <span class="bu">int</span> <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>                points_list: <span class="bu">set</span> <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>                <span class="op">**</span>kwargs) <span class="op">-&gt;</span> <span class="bu">tuple</span>[<span class="bu">int</span> <span class="op">|</span> <span class="va">None</span>, <span class="bu">float</span> <span class="op">|</span> <span class="va">None</span>]:</span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="co">        `env`: MultiDiGraph — граф улично-дорожной сети.</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a><span class="co">        `area`: pandas.Series — маска узлов графа для расчёта доступности (см. NodeMetric).</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a><span class="co">        `start_point`: не используется.</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a><span class="co">        `points_list`: set — начальный набор узлов-кандидатов.</span></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a><span class="co">        Возвращает `(best_node, best_metric)`.</span></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a><span class="co">        """</span></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Подготовка исходных узлов</span></span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> points_list <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>            current_nodes <span class="op">=</span> <span class="bu">list</span>(env.nodes())</span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a>            current_nodes <span class="op">=</span> <span class="bu">list</span>(points_list)</span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Проекция графа</span></span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Проекция графа только если он в географической системе координат</span></span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> env.graph[<span class="st">'crs'</span>] <span class="op">==</span> <span class="st">'epsg:4326'</span>:</span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a>            G <span class="op">=</span> ox.project_graph(env)</span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>            G <span class="op">=</span> env</span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a>        node_metric_fn <span class="op">=</span> NodeMetric(<span class="va">self</span>.state_function, <span class="va">self</span>.metric_function)</span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a>        best_node <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a>        best_metric <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a>        level <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a>        best_squares <span class="op">=</span> []</span>
+<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span> <span class="va">True</span>:</span>
+<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Ограничиваем текущие узлы маской area, если задана</span></span>
+<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> area <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a>                current_nodes <span class="op">=</span> [u <span class="cf">for</span> u <span class="kw">in</span> current_nodes <span class="cf">if</span> area.get(u, <span class="va">False</span>)]</span>
+<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="kw">not</span> current_nodes:</span>
+<span id="cb3-67"><a href="#cb3-67" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> <span class="va">None</span>, <span class="va">None</span></span>
+<span id="cb3-68"><a href="#cb3-68" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Координаты узлов</span></span>
+<span id="cb3-69"><a href="#cb3-69" aria-hidden="true" tabindex="-1"></a>            xs <span class="op">=</span> [G.nodes[u][<span class="st">'x'</span>] <span class="cf">for</span> u <span class="kw">in</span> current_nodes]</span>
+<span id="cb3-70"><a href="#cb3-70" aria-hidden="true" tabindex="-1"></a>            ys <span class="op">=</span> [G.nodes[u][<span class="st">'y'</span>] <span class="cf">for</span> u <span class="kw">in</span> current_nodes]</span>
+<span id="cb3-71"><a href="#cb3-71" aria-hidden="true" tabindex="-1"></a>            x_min, x_max <span class="op">=</span> <span class="bu">min</span>(xs), <span class="bu">max</span>(xs)</span>
+<span id="cb3-72"><a href="#cb3-72" aria-hidden="true" tabindex="-1"></a>            y_min, y_max <span class="op">=</span> <span class="bu">min</span>(ys), <span class="bu">max</span>(ys)</span>
+<span id="cb3-73"><a href="#cb3-73" aria-hidden="true" tabindex="-1"></a>            dx, dy <span class="op">=</span> x_max <span class="op">-</span> x_min, y_max <span class="op">-</span> y_min</span>
+<span id="cb3-74"><a href="#cb3-74" aria-hidden="true" tabindex="-1"></a>            size <span class="op">=</span> <span class="bu">min</span>(dx, dy) <span class="op">/</span> <span class="dv">2</span></span>
+<span id="cb3-75"><a href="#cb3-75" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Создание квадратов</span></span>
+<span id="cb3-76"><a href="#cb3-76" aria-hidden="true" tabindex="-1"></a>            nx_squares <span class="op">=</span> <span class="bu">int</span>(math.ceil(dx <span class="op">/</span> size))</span>
+<span id="cb3-77"><a href="#cb3-77" aria-hidden="true" tabindex="-1"></a>            ny_squares <span class="op">=</span> <span class="bu">int</span>(math.ceil(dy <span class="op">/</span> size))</span>
+<span id="cb3-78"><a href="#cb3-78" aria-hidden="true" tabindex="-1"></a>            squares <span class="op">=</span> []</span>
+<span id="cb3-79"><a href="#cb3-79" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(nx_squares):</span>
+<span id="cb3-80"><a href="#cb3-80" aria-hidden="true" tabindex="-1"></a>                <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(ny_squares):</span>
+<span id="cb3-81"><a href="#cb3-81" aria-hidden="true" tabindex="-1"></a>                    x0, y0 <span class="op">=</span> x_min <span class="op">+</span> i <span class="op">*</span> size, y_min <span class="op">+</span> j <span class="op">*</span> size</span>
+<span id="cb3-82"><a href="#cb3-82" aria-hidden="true" tabindex="-1"></a>                    squares.append((x0, y0, x0 <span class="op">+</span> size, y0 <span class="op">+</span> size))</span>
+<span id="cb3-83"><a href="#cb3-83" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Оценка квадратов</span></span>
+<span id="cb3-84"><a href="#cb3-84" aria-hidden="true" tabindex="-1"></a>            best_node_sq <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb3-85"><a href="#cb3-85" aria-hidden="true" tabindex="-1"></a>            best_metric_sq <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb3-86"><a href="#cb3-86" aria-hidden="true" tabindex="-1"></a>            best_square_nodes <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb3-87"><a href="#cb3-87" aria-hidden="true" tabindex="-1"></a>            square <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb3-88"><a href="#cb3-88" aria-hidden="true" tabindex="-1"></a>            best_squares_in_square <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb3-89"><a href="#cb3-89" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> x0, y0, x1, y1 <span class="kw">in</span> squares:</span>
+<span id="cb3-90"><a href="#cb3-90" aria-hidden="true" tabindex="-1"></a>                <span class="co"># Узлы в квадрате</span></span>
+<span id="cb3-91"><a href="#cb3-91" aria-hidden="true" tabindex="-1"></a>                nodes_sq <span class="op">=</span> [u <span class="cf">for</span> u <span class="kw">in</span> current_nodes <span class="cf">if</span> x0 <span class="op">&lt;=</span> G.nodes[u][<span class="st">'x'</span>] <span class="op">&lt;=</span> x1 <span class="kw">and</span> y0 <span class="op">&lt;=</span> G.nodes[u][<span class="st">'y'</span>] <span class="op">&lt;=</span> y1]</span>
+<span id="cb3-92"><a href="#cb3-92" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> <span class="kw">not</span> nodes_sq:</span>
+<span id="cb3-93"><a href="#cb3-93" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">continue</span></span>
+<span id="cb3-94"><a href="#cb3-94" aria-hidden="true" tabindex="-1"></a>                <span class="co"># Выборка узлов</span></span>
+<span id="cb3-95"><a href="#cb3-95" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> <span class="bu">len</span>(nodes_sq) <span class="op">&gt;</span> <span class="va">self</span>.n_samples:</span>
+<span id="cb3-96"><a href="#cb3-96" aria-hidden="true" tabindex="-1"></a>                    sample <span class="op">=</span> random.sample(nodes_sq, <span class="va">self</span>.n_samples)</span>
+<span id="cb3-97"><a href="#cb3-97" aria-hidden="true" tabindex="-1"></a>                <span class="cf">else</span>:</span>
+<span id="cb3-98"><a href="#cb3-98" aria-hidden="true" tabindex="-1"></a>                    sample <span class="op">=</span> nodes_sq</span>
+<span id="cb3-99"><a href="#cb3-99" aria-hidden="true" tabindex="-1"></a>                <span class="co"># Оценка узлов</span></span>
+<span id="cb3-100"><a href="#cb3-100" aria-hidden="true" tabindex="-1"></a>                <span class="cf">for</span> u <span class="kw">in</span> sample:</span>
+<span id="cb3-101"><a href="#cb3-101" aria-hidden="true" tabindex="-1"></a>                    node_metric <span class="op">=</span> node_metric_fn(env<span class="op">=</span>G, node<span class="op">=</span>u, area<span class="op">=</span>area, <span class="op">**</span>kwargs)</span>
+<span id="cb3-102"><a href="#cb3-102" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">if</span> node_metric <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb3-103"><a href="#cb3-103" aria-hidden="true" tabindex="-1"></a>                        <span class="cf">continue</span></span>
+<span id="cb3-104"><a href="#cb3-104" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">if</span> best_metric_sq <span class="kw">is</span> <span class="va">None</span> <span class="kw">or</span> <span class="va">self</span>.metric_function.compare(node_metric, best_metric_sq) <span class="op">==</span> node_metric:</span>
+<span id="cb3-105"><a href="#cb3-105" aria-hidden="true" tabindex="-1"></a>                        best_metric_sq <span class="op">=</span> node_metric</span>
+<span id="cb3-106"><a href="#cb3-106" aria-hidden="true" tabindex="-1"></a>                        best_node_sq <span class="op">=</span> u</span>
+<span id="cb3-107"><a href="#cb3-107" aria-hidden="true" tabindex="-1"></a>                        best_square_nodes <span class="op">=</span> nodes_sq</span>
+<span id="cb3-108"><a href="#cb3-108" aria-hidden="true" tabindex="-1"></a>                        best_squares_in_square <span class="op">=</span> (x0, y0, x1, y1)</span>
+<span id="cb3-109"><a href="#cb3-109" aria-hidden="true" tabindex="-1"></a>                <span class="bu">print</span>(<span class="ss">f'square </span><span class="sc">{</span>square<span class="sc">}</span><span class="ss"> - </span><span class="sc">{</span>best_node_sq<span class="sc">}</span><span class="ss">, </span><span class="sc">{</span>best_metric_sq<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb3-110"><a href="#cb3-110" aria-hidden="true" tabindex="-1"></a>                square <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb3-111"><a href="#cb3-111" aria-hidden="true" tabindex="-1"></a>            best_squares.append(best_squares_in_square)</span>
+<span id="cb3-112"><a href="#cb3-112" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> best_node_sq <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb3-113"><a href="#cb3-113" aria-hidden="true" tabindex="-1"></a>                <span class="cf">break</span></span>
+<span id="cb3-114"><a href="#cb3-114" aria-hidden="true" tabindex="-1"></a>            best_node, best_metric <span class="op">=</span> best_node_sq, best_metric_sq</span>
+<span id="cb3-115"><a href="#cb3-115" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Проверка условия останова</span></span>
+<span id="cb3-116"><a href="#cb3-116" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="bu">len</span>(best_square_nodes) <span class="op">&lt;=</span> <span class="va">self</span>.n_min_count:</span>
+<span id="cb3-117"><a href="#cb3-117" aria-hidden="true" tabindex="-1"></a>                <span class="cf">break</span></span>
+<span id="cb3-118"><a href="#cb3-118" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Переход к узлам лучшего квадрата</span></span>
+<span id="cb3-119"><a href="#cb3-119" aria-hidden="true" tabindex="-1"></a>            current_nodes <span class="op">=</span> best_square_nodes</span>
+<span id="cb3-120"><a href="#cb3-120" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Печать результата</span></span>
+<span id="cb3-121"><a href="#cb3-121" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f'level </span><span class="sc">{</span>level<span class="sc">}</span><span class="ss"> - </span><span class="sc">{</span>best_node<span class="sc">}</span><span class="ss">, </span><span class="sc">{</span>best_metric<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb3-122"><a href="#cb3-122" aria-hidden="true" tabindex="-1"></a>            level <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb3-123"><a href="#cb3-123" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-124"><a href="#cb3-124" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> best_node, best_metric, best_squares</span></code><button title="Скопировать текст" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Важное уведомление
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>В данном случае функционал алгоритма был расширен за счет добавления в перечень возвращаемых переменных списка квадратов в пределах которых обнаружен лучший узел.</p>
+<p>Это сделано для визуализации хода расчета и отладки. В готовых решениях изменение перечня возвращаемых аргументов строго воспрещено логикой и будет приводить к ошибке при использовании алгоритма в составе гибридных решений.</p>
+</div>
+</div>
+<div id="cell-11" class="cell" data-execution_count="38">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Инициализация алгоритма</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>blp <span class="op">=</span> BestNodeSquareZoom(</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    state_function  <span class="op">=</span> FirstArrivalUnitState(),</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    metric_function <span class="op">=</span> ArrivalTime(),</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    n_samples       <span class="op">=</span> <span class="dv">10</span>,</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    n_min_count     <span class="op">=</span> <span class="dv">10</span>,</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Расчет лучшего размещения</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>best_node, best_metric, best_squares <span class="op">=</span> blp(G)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Печать результата</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Наиболее выгодная точка размещения:'</span>, best_node)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Среднее время следования в любую точку города:'</span>, best_metric, <span class="st">'мин'</span>)</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Визуализация ГДС с оптимальной точкой размещения и квадратами последовательного приближения</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>geometry <span class="op">=</span> [shapely.geometry.box(x0, y0, x1, y1) <span class="cf">for</span> x0, y0, x1, y1 <span class="kw">in</span> best_squares]</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>boxes <span class="op">=</span> gpd.GeoDataFrame(geometry, columns<span class="op">=</span>[<span class="st">'geometry'</span>], crs<span class="op">=</span>ox.project_graph(G).graph[<span class="st">'crs'</span>])</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>boxes <span class="op">=</span> ox.projection.project_gdf(boxes, to_latlong<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">10</span>))</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>ox.plot_graph(G, ax<span class="op">=</span>ax, node_size<span class="op">=</span><span class="dv">0</span>, edge_linewidth<span class="op">=</span><span class="fl">0.2</span>, show<span class="op">=</span><span class="va">False</span>, close<span class="op">=</span><span class="va">False</span>, bgcolor<span class="op">=</span><span class="st">'white'</span>)</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>boxes.boundary.plot(ax<span class="op">=</span>ax, color<span class="op">=</span><span class="st">'red'</span>, linewidth<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>ox.graph_to_gdfs(G, edges<span class="op">=</span><span class="va">False</span>).loc[[best_node]].plot(ax<span class="op">=</span>ax, color<span class="op">=</span><span class="st">'g'</span>, marker<span class="op">=</span><span class="st">'x'</span>, </span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>                                                       markersize<span class="op">=</span><span class="dv">50</span>, zorder<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Скопировать текст" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>square 1 - 10731791184, 16.59093751929235
+square 2 - 10731791184, 16.59093751929235
+square 3 - 10731791184, 16.59093751929235
+square 4 - 10731791184, 16.59093751929235
+square 5 - 10731791184, 16.59093751929235
+square 6 - 10731791184, 16.59093751929235
+level 1 - 10731791184, 16.59093751929235
+square 1 - 775453060, 28.338463824106277
+square 2 - 5084974091, 22.200625880473066
+square 3 - 390615908, 20.29736344874703
+square 4 - 1432526171, 15.506545978847514
+square 5 - 1432526171, 15.506545978847514
+level 2 - 1432526171, 15.506545978847514
+square 1 - 2537678942, 20.263088896759616
+square 2 - 10941191746, 18.7696212272216
+square 3 - 10595884338, 16.92572271200879
+square 4 - 12200773782, 15.484790316849084
+square 5 - 12200773782, 15.484790316849084
+level 3 - 12200773782, 15.484790316849084
+square 1 - 1515032972, 15.219339346913326
+square 2 - 1515032972, 15.219339346913326
+square 3 - 1515032972, 15.219339346913326
+square 4 - 1515032972, 15.219339346913326
+square 5 - 1515032972, 15.219339346913326
+square 6 - 1515032972, 15.219339346913326
+level 4 - 1515032972, 15.219339346913326
+square 1 - 390613791, 16.475635293267853
+square 2 - 4601182850, 15.941077682379353
+square 3 - 11158618461, 15.65007931157646
+square 4 - 7006849344, 15.013390330769834
+square 5 - 7006849344, 15.013390330769834
+square 6 - 7006849344, 15.013390330769834
+level 5 - 7006849344, 15.013390330769834
+square 1 - 7006849345, 15.324028345875975
+square 2 - 7006849343, 15.007631582434886
+square 3 - 7006849343, 15.007631582434886
+square 4 - 7006849343, 15.007631582434886
+square 5 - 7006849343, 15.007631582434886
+square 6 - 7006849343, 15.007631582434886
+level 6 - 7006849343, 15.007631582434886
+square 1 - 2894797289, 15.320314746037086
+square 2 - 7022571966, 15.29656584051659
+square 3 - 7333352916, 15.127149871412495
+square 4 - 7333352916, 15.127149871412495
+square 5 - 390616687, 15.007016683613063
+square 6 - 390616687, 15.007016683613063
+Наиболее выгодная точка размещения: 390616687
+Среднее время следования в любую точку города: 15.007016683613063 мин</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="470_custom_classes_files/figure-html/cell-5-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Проверка расчета для метрики ИП-10.</p>
+<p>Дополнительно используем функцию <code>genesis.untils.timing</code> для вывода времени ваыполнения алгоритма.</p>
+<div id="cell-13" class="cell" data-execution_count="39">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Использование алгоритма Обезьяньего поиска</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> genesis.metrics <span class="im">import</span> CoverIndex</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> genesis.utils <span class="im">import</span> timing</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>blp <span class="op">=</span> timing(BestNodeSquareZoom(</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    state_function  <span class="op">=</span> FirstArrivalUnitState(),</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    metric_function <span class="op">=</span> CoverIndex(),</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    n_samples       <span class="op">=</span> <span class="dv">10</span>,</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    n_min_count     <span class="op">=</span> <span class="dv">5</span>,</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    ))</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Расчет лучшего размещения</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>best_node, best_metric, _ <span class="op">=</span> blp(env<span class="op">=</span>G)</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Печать результата</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Наиболее выгодная точка размещения:'</span>, best_node)</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Среднее время следования в любую точку города:'</span>, best_metric, <span class="st">'мин'</span>)</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Визуализация ГДС с оптимальной точкой размещения</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> ox.plot_graph(G, node_size<span class="op">=</span><span class="dv">0</span>, edge_linewidth<span class="op">=</span><span class="fl">0.2</span>, show<span class="op">=</span><span class="va">False</span>, close<span class="op">=</span><span class="va">False</span>, bgcolor<span class="op">=</span><span class="st">'white'</span>)</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>ox.graph_to_gdfs(G, edges<span class="op">=</span><span class="va">False</span>).loc[[best_node]].plot(ax<span class="op">=</span>ax, color<span class="op">=</span><span class="st">'red'</span>)<span class="op">;</span></span></code><button title="Скопировать текст" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>square 1 - 10560741809, 25.791531303342328
+square 2 - 10560741809, 25.791531303342328
+square 3 - 10560741809, 25.791531303342328
+square 4 - 12240751488, 32.86162656241397
+square 5 - 12240751488, 32.86162656241397
+square 6 - 12240751488, 32.86162656241397
+level 1 - 12240751488, 32.86162656241397
+square 1 - 7005955871, 8.264963383073619
+square 2 - 12333912009, 27.212157920819337
+square 3 - 12240751495, 32.87814547657067
+square 4 - 12240751495, 32.87814547657067
+square 5 - 12240751495, 32.87814547657067
+square 6 - 12240751495, 32.87814547657067
+level 2 - 12240751495, 32.87814547657067
+square 1 - 10669461560, 31.308848631683276
+square 2 - 10669461560, 31.308848631683276
+square 3 - 5619329469, 31.319861241121085
+square 4 - 5619329469, 31.319861241121085
+square 5 - 5619329469, 31.319861241121085
+square 6 - 5619329469, 31.319861241121085
+level 3 - 5619329469, 31.319861241121085
+square 1 - 9107440367, 33.01580309454325
+square 2 - 9107440367, 33.01580309454325
+square 3 - 9107440367, 33.01580309454325
+square 4 - 9107440367, 33.01580309454325
+square 5 - 9107440367, 33.01580309454325
+level 4 - 9107440367, 33.01580309454325
+square 1 - 9047627587, 32.333021309399264
+square 2 - 9107440367, 33.01580309454325
+square 3 - 9107440367, 33.01580309454325
+square 4 - 9107440367, 33.01580309454325
+square 5 - 9107440367, 33.01580309454325
+square 6 - 9107440367, 33.01580309454325
+level 5 - 9107440367, 33.01580309454325
+square 1 - 1802324973, 32.492704146247455
+square 2 - 1802324973, 32.492704146247455
+square 3 - 1802324973, 32.492704146247455
+square 4 - 12240751488, 32.86162656241397
+square 5 - 9107440367, 33.01580309454325
+square 6 - 9107440367, 33.01580309454325
+ВРЕМЯ: 71.39 сек
+Наиболее выгодная точка размещения: 9107440367
+Среднее время следования в любую точку города: 33.01580309454325 мин</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="470_custom_classes_files/figure-html/cell-6-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Аналогичным образом можно разрабатывать и иные решения наследующие базовые классы и в дальнейшем эффективно их применять.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Уведомление
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Основным условием эффективной разработки является строгое соблюдение интерфейса базового класса.</p>
+</div>
+</div>
+</section>
+<section id="пример-реализации-пользовательской-метрики" class="level2" data-number="20.2">
+<h2 data-number="20.2" class="anchored" data-anchor-id="пример-реализации-пользовательской-метрики"><span class="header-section-number">20.2</span> Пример реализации пользовательской метрики</h2>
+<p>Пользователь имеет возможность реализации собственных функций расчета метрик.</p>
+<p>Ниже приведен пример реализации метрики оценивающей неравномерность нагрузки на ПСЧ.</p>
+<p>Для этого будем оценивать значение стандартного отклонения количества прикрываемых каждым подразделением.</p>
+<p>Стандартное отклонение рассчитывается по формуле:</p>
+<p><span class="math display">\[\sigma = \sqrt{\frac{\sum(x - \mu)^2}{N}}\]</span></p>
+<p>где: - <span class="math inline">\(\sigma\)</span> - стандартное отклонение - <span class="math inline">\(x\)</span> - значение в выборке - <span class="math inline">\(\mu\)</span> - среднее арифметическое выборки - <span class="math inline">\(N\)</span> - размер выборки</p>
+<div id="cell-17" class="cell" data-execution_count="47">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> StdIndex(MetricBase):</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, comp_func:<span class="bu">callable</span><span class="op">=</span><span class="bu">min</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>        <span class="co">'''</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co">        Функция comp_func отвечает за сравнение значений полученных при помощи метрики.</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co">        '''</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>(comp_func)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__call__</span>(<span class="va">self</span>, state, area<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>        <span class="co">'''</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="co">        `state` (`состояние`): pd.Series</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="co">            В данном случае это будет серия идентификаторов ближайших подразделений.</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="co">            получаемая в результате работы функций расчета состояния.</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="co">                times, nearest = FirstArrivalUnitState()(env=G, area=area)</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="co">        `area`: pd.Series</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="co">            Серия данных содержащих маску точек которые должны быть учтены при расчете метрики.</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="co">        '''</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> <span class="bu">isinstance</span>(state, (<span class="bu">list</span>, pd.Series)):</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span> <span class="pp">TypeError</span>(</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>                <span class="ss">f"Аргумент times может быть только типа list или pd.Series"</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>                <span class="ss">f" Имеется </span><span class="sc">{</span><span class="bu">type</span>(state)<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>                )</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Отбор узлов по area (списку узлов которые следует учесть в расчете)</span></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> area <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="bu">isinstance</span>(state, pd.Series):</span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>                state_c <span class="op">=</span> state.loc[area]</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span>:</span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>                state_c <span class="op">=</span> [x <span class="cf">for</span> x <span class="kw">in</span> state <span class="cf">if</span> x <span class="kw">in</span> area]</span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>            state_c <span class="op">=</span> state</span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Расчет количества узлов прикрываемых каждым подразделением</span></span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>        values <span class="op">=</span> state.value_counts()</span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> values.std()</span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a><span class="co"># Проверка работы метрики</span></span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>g_nodes <span class="op">=</span> <span class="bu">list</span>(G.nodes)</span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>start_points <span class="op">=</span> {</span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>    g_nodes[<span class="dv">1000</span>]: <span class="st">'псч 1'</span>,</span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>    g_nodes[<span class="dv">2000</span>]: <span class="st">'псч 2'</span>,</span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>    g_nodes[<span class="dv">3000</span>]: <span class="st">'псч 3'</span>,</span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>    g_nodes[<span class="dv">4000</span>]: <span class="st">'псч 4'</span>,</span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a>times, nearest <span class="op">=</span> FirstArrivalUnitState()(env<span class="op">=</span>G, points<span class="op">=</span>start_points)</span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Метрика неравномерности нагрузки на ПСЧ:"</span>, StdIndex()(nearest))</span>
+<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Количество прикрываемых ПСЧ узлов (нагрузка):'</span>)</span>
+<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(nearest.value_counts())</span></code><button title="Скопировать текст" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Метрика неравномерности нагрузки на ПСЧ: 5333.579621917473
+Количество прикрываемых ПСЧ узлов (нагрузка):
+nearest
+псч 4    12418
+псч 3     3171
+псч 2     1623
+псч 1      949
+Name: count, dtype: int64</code></pre>
+</div>
+</div>
+<p>Чем меньше данный показатель, тем лучше - это значит, что нагрузка на подразделения распределена равномерно. Рассмотрим несколько вариантов расстановки.</p>
+<div id="cell-19" class="cell" data-execution_count="49">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Вариант расстановки №1'</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>start_points <span class="op">=</span> {</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    g_nodes[<span class="dv">1000</span>]: <span class="st">'псч 1'</span>,</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    g_nodes[<span class="dv">2000</span>]: <span class="st">'псч 2'</span>,</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    g_nodes[<span class="dv">3000</span>]: <span class="st">'псч 3'</span>,</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    g_nodes[<span class="dv">4000</span>]: <span class="st">'псч 4'</span>,</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>times, nearest <span class="op">=</span> FirstArrivalUnitState()(env<span class="op">=</span>G, points<span class="op">=</span>start_points)</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Неравномерность нагрузки на ПСЧ:"</span>, StdIndex()(nearest))</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Вариант расстановки №2'</span>)</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>start_points <span class="op">=</span> {</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    g_nodes[<span class="dv">1500</span>]: <span class="st">'псч 1'</span>,</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    g_nodes[<span class="dv">2500</span>]: <span class="st">'псч 2'</span>,</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    g_nodes[<span class="dv">3500</span>]: <span class="st">'псч 3'</span>,</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    g_nodes[<span class="dv">4500</span>]: <span class="st">'псч 4'</span>,</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>times, nearest <span class="op">=</span> FirstArrivalUnitState()(env<span class="op">=</span>G, points<span class="op">=</span>start_points)</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Неравномерность нагрузки на ПСЧ:"</span>, StdIndex()(nearest))</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Вариант расстановки №3'</span>)</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>start_points <span class="op">=</span> {</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>    g_nodes[<span class="dv">5000</span>]: <span class="st">'псч 1'</span>,</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    g_nodes[<span class="dv">6000</span>]: <span class="st">'псч 2'</span>,</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>    g_nodes[<span class="dv">7000</span>]: <span class="st">'псч 3'</span>,</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>    g_nodes[<span class="dv">8000</span>]: <span class="st">'псч 4'</span>,</span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>times, nearest <span class="op">=</span> FirstArrivalUnitState()(env<span class="op">=</span>G, points<span class="op">=</span>start_points)</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Неравномерность нагрузки на ПСЧ:"</span>, StdIndex()(nearest))</span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Вариант расстановки №4'</span>)</span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>start_points <span class="op">=</span> {</span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>    g_nodes[<span class="dv">1000</span>]: <span class="st">'псч 1'</span>,</span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>    g_nodes[<span class="dv">2000</span>]: <span class="st">'псч 2'</span>,</span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>    g_nodes[<span class="dv">10000</span>]: <span class="st">'псч 3'</span>,</span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>    g_nodes[<span class="dv">15000</span>]: <span class="st">'псч 4'</span>,</span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>times, nearest <span class="op">=</span> FirstArrivalUnitState()(env<span class="op">=</span>G, points<span class="op">=</span>start_points)</span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Неравномерность нагрузки на ПСЧ:"</span>, StdIndex()(nearest))</span></code><button title="Скопировать текст" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Вариант расстановки №1
+Неравномерность нагрузки на ПСЧ: 5333.579621917473
+Вариант расстановки №2
+Неравномерность нагрузки на ПСЧ: 2694.043599622446
+Вариант расстановки №3
+Неравномерность нагрузки на ПСЧ: 4038.7765783712275
+Вариант расстановки №4
+Неравномерность нагрузки на ПСЧ: 3621.3004455121736</code></pre>
+</div>
+</div>
+<p>Видно, что с точки зрения равномерности нагрузки наилучшим вариантом является <strong>Вариант №2</strong>.</p>
+</section>
+<section id="модификация-существующего-алгоритма-mclp" class="level2" data-number="20.3">
+<h2 data-number="20.3" class="anchored" data-anchor-id="модификация-существующего-алгоритма-mclp"><span class="header-section-number">20.3</span> Модификация существующего алгоритма MCLP</h2>
+<p>Однако, логика алгоритмов Генезис подразумевает передачи в функции метрик только серии времен <code>times</code>. Серия идентификаторов ближайших подразделений <code>nearest</code> не реализована, поэтому для ее корректного использования необходимо также внести изменения и в алгоритм расчета.</p>
+<p>Сделаем это на примере Генетического алгоритма. Для модификации достаточно изменить функцию расчета приспособленности <code>_fit_function</code>.</p>
+<div id="cell-23" class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> genesis.core <span class="im">import</span> MCLPBase, PointSelectorBase</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> genesis.tools <span class="im">import</span> list_dict_concat</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BestNodesGA2(MCLPBase):</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>,</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>                 state_function     :StateBase,</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>                 metric_function    :MetricBase,</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>                 node_selector      :PointSelectorBase,</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>                 population_size    :<span class="bu">int</span> <span class="op">=</span> <span class="dv">25</span>,</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>                 epochs             :<span class="bu">int</span> <span class="op">=</span> <span class="dv">50</span>,</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>                 mutation_rate      :<span class="bu">float</span> <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>                 elite_size         :<span class="bu">int</span> <span class="op">=</span> <span class="dv">0</span>,</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>                 appr_val_in_area   :<span class="bu">float</span> <span class="op">=</span> <span class="dv">0</span>,</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>                 mutation_max_count :<span class="bu">int</span> <span class="op">|</span> <span class="bu">float</span> <span class="op">=</span> <span class="dv">1</span>,</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>                 bad_val_in_area    :<span class="bu">int</span> <span class="op">=</span> <span class="dv">1000</span>,</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>                 epoch_end_function :<span class="bu">callable</span> <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>                 stop_case_function :<span class="bu">callable</span> <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>                 <span class="op">**</span>kwargs) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> population_size <span class="op">&lt;=</span> <span class="dv">5</span>:</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="st">'Размер популяции должен быть &gt; 0, так же не рекомендуется использовать размер популяции &lt; 5'</span>)</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> epochs  <span class="op">&lt;=</span>  <span class="dv">0</span>:</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="st">'Количество эпох должно быть &gt; 0'</span>)</span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> mutation_max_count  <span class="op">&lt;=</span>  <span class="dv">0</span>:</span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="st">'Максимальное количество единиц мутации должно быть &gt; 0'</span>)</span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> mutation_rate <span class="op">&lt;</span><span class="dv">0</span> <span class="kw">or</span> mutation_rate <span class="op">&gt;</span> <span class="dv">1</span>:</span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="st">'Вероятность мутации должна лежать в диапазоне (0,1)'</span>)</span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> appr_val_in_area <span class="op">&lt;</span><span class="dv">0</span> <span class="kw">or</span> appr_val_in_area <span class="op">&gt;</span> <span class="dv">1</span>:</span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="st">'Доля узлов графа в пределах area, должна лежать в диапазоне (0,1)'</span>)</span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> elite_size <span class="op">&lt;</span> <span class="dv">0</span>:</span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="st">'Количество особей в элитной группе должно быть &gt;= 0'</span>)</span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.population_size <span class="op">=</span> population_size</span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.epochs <span class="op">=</span> epochs</span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.mutation_rate <span class="op">=</span> mutation_rate</span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.elite_size <span class="op">=</span> elite_size</span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.appr_val_in_area <span class="op">=</span> appr_val_in_area</span>
+<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.mutation_max_count <span class="op">=</span> mutation_max_count</span>
+<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.bad_val_in_area <span class="op">=</span> bad_val_in_area</span>
+<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.epoch_end_function <span class="op">=</span> epoch_end_function</span>
+<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.stop_case_function <span class="op">=</span> stop_case_function</span>
+<span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.node_selector <span class="op">=</span> node_selector</span>
+<span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>(state_function, metric_function, <span class="op">**</span>kwargs)</span>
+<span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-47"><a href="#cb12-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a><span class="co"># Достаточно внести изменения в функцию расчета приспособленности</span></span>
+<span id="cb12-49"><a href="#cb12-49" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _fit_function(<span class="va">self</span>, env, nodes, area<span class="op">=</span><span class="va">None</span>, <span class="op">**</span>kwargs):</span>
+<span id="cb12-50"><a href="#cb12-50" aria-hidden="true" tabindex="-1"></a>        <span class="co">'''</span></span>
+<span id="cb12-51"><a href="#cb12-51" aria-hidden="true" tabindex="-1"></a><span class="co">        Расчет функции приспособленности</span></span>
+<span id="cb12-52"><a href="#cb12-52" aria-hidden="true" tabindex="-1"></a><span class="co">        '''</span></span>
+<span id="cb12-53"><a href="#cb12-53" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 2.1. Расчет состояния</span></span>
+<span id="cb12-54"><a href="#cb12-54" aria-hidden="true" tabindex="-1"></a>        times, nearest <span class="op">=</span> <span class="va">self</span>.state_function(env<span class="op">=</span>env, points<span class="op">=</span>nodes, area<span class="op">=</span>area, <span class="op">**</span>kwargs)</span>
+<span id="cb12-55"><a href="#cb12-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-56"><a href="#cb12-56" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> area <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb12-57"><a href="#cb12-57" aria-hidden="true" tabindex="-1"></a>            appr_nodes_count <span class="op">=</span> area.<span class="bu">sum</span>() <span class="op">*</span> <span class="va">self</span>.appr_val_in_area</span>
+<span id="cb12-58"><a href="#cb12-58" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Проверка на обеспечение требуемой степени прикрытия территории</span></span>
+<span id="cb12-59"><a href="#cb12-59" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="bu">len</span>(nearest) <span class="op">&lt;</span> appr_nodes_count:</span>
+<span id="cb12-60"><a href="#cb12-60" aria-hidden="true" tabindex="-1"></a>                <span class="bu">print</span>(<span class="st">'Расстановка не обеспечивает требуемую степень прикрытия территории area'</span>)</span>
+<span id="cb12-61"><a href="#cb12-61" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> <span class="va">self</span>.bad_val_in_area</span>
+<span id="cb12-62"><a href="#cb12-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-63"><a href="#cb12-63" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 2.2. Расчет стартовой метрики состояния и определение стартового размещения</span></span>
+<span id="cb12-64"><a href="#cb12-64" aria-hidden="true" tabindex="-1"></a><span class="co"># Расчет метрики неравномерности нагрузки на ПСЧ</span></span>
+<span id="cb12-65"><a href="#cb12-65" aria-hidden="true" tabindex="-1"></a><span class="co"># Здесь заменяем `times` на `nearest` </span></span>
+<span id="cb12-66"><a href="#cb12-66" aria-hidden="true" tabindex="-1"></a>        best_metric <span class="op">=</span> <span class="va">self</span>.metric_function(nearest, <span class="op">**</span>kwargs)</span>
+<span id="cb12-67"><a href="#cb12-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-68"><a href="#cb12-68" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> best_metric</span>
+<span id="cb12-69"><a href="#cb12-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-70"><a href="#cb12-70" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _mutate(<span class="va">self</span>, env, new_dynamic_nodes, area):</span>
+<span id="cb12-71"><a href="#cb12-71" aria-hidden="true" tabindex="-1"></a>        <span class="co">'''</span></span>
+<span id="cb12-72"><a href="#cb12-72" aria-hidden="true" tabindex="-1"></a><span class="co">        Мутация особи</span></span>
+<span id="cb12-73"><a href="#cb12-73" aria-hidden="true" tabindex="-1"></a><span class="co">        '''</span></span>
+<span id="cb12-74"><a href="#cb12-74" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.mutation_max_count <span class="op">&gt;=</span> <span class="dv">1</span>:</span>
+<span id="cb12-75"><a href="#cb12-75" aria-hidden="true" tabindex="-1"></a>            mutation_count <span class="op">=</span> <span class="va">self</span>.mutation_max_count</span>
+<span id="cb12-76"><a href="#cb12-76" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> <span class="va">self</span>.mutation_max_count <span class="op">&gt;</span> <span class="dv">0</span> <span class="kw">and</span> <span class="va">self</span>.mutation_max_count <span class="op">&lt;</span> <span class="dv">1</span>:</span>
+<span id="cb12-77"><a href="#cb12-77" aria-hidden="true" tabindex="-1"></a>            mutation_count <span class="op">=</span> <span class="bu">int</span>(<span class="bu">len</span>(new_dynamic_nodes) <span class="op">*</span> <span class="va">self</span>.mutation_max_count)</span>
+<span id="cb12-78"><a href="#cb12-78" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb12-79"><a href="#cb12-79" aria-hidden="true" tabindex="-1"></a>            mutation_count <span class="op">=</span> <span class="bu">len</span>(new_dynamic_nodes)</span>
+<span id="cb12-80"><a href="#cb12-80" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> mutation_count <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb12-81"><a href="#cb12-81" aria-hidden="true" tabindex="-1"></a>            mutation_count <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb12-82"><a href="#cb12-82" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(mutation_count):</span>
+<span id="cb12-83"><a href="#cb12-83" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> random.random() <span class="op">&lt;</span> <span class="va">self</span>.mutation_rate:</span>
+<span id="cb12-84"><a href="#cb12-84" aria-hidden="true" tabindex="-1"></a>                <span class="co"># Выбор случайного элемента в словаре и удаление его из new_dynamic_nodes</span></span>
+<span id="cb12-85"><a href="#cb12-85" aria-hidden="true" tabindex="-1"></a>                node, unit <span class="op">=</span> random.choice(<span class="bu">list</span>(new_dynamic_nodes.items()))</span>
+<span id="cb12-86"><a href="#cb12-86" aria-hidden="true" tabindex="-1"></a>                <span class="kw">del</span> new_dynamic_nodes[node]</span>
+<span id="cb12-87"><a href="#cb12-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-88"><a href="#cb12-88" aria-hidden="true" tabindex="-1"></a>                <span class="co"># Поиск нового узла, которого при этом нет в new_dynamic_nodes</span></span>
+<span id="cb12-89"><a href="#cb12-89" aria-hidden="true" tabindex="-1"></a>                node <span class="op">=</span> <span class="va">self</span>.node_selector(env<span class="op">=</span>env, points<span class="op">=</span>new_dynamic_nodes, area<span class="op">=</span>area)</span>
+<span id="cb12-90"><a href="#cb12-90" aria-hidden="true" tabindex="-1"></a>                new_dynamic_nodes[node] <span class="op">=</span> unit</span>
+<span id="cb12-91"><a href="#cb12-91" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-92"><a href="#cb12-92" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span>  new_dynamic_nodes</span>
+<span id="cb12-93"><a href="#cb12-93" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-94"><a href="#cb12-94" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__call__</span>(<span class="va">self</span>,</span>
+<span id="cb12-95"><a href="#cb12-95" aria-hidden="true" tabindex="-1"></a>                 env:nx.Graph,</span>
+<span id="cb12-96"><a href="#cb12-96" aria-hidden="true" tabindex="-1"></a>                 dynamic_nodes: <span class="bu">dict</span>,</span>
+<span id="cb12-97"><a href="#cb12-97" aria-hidden="true" tabindex="-1"></a>                 static_nodes: <span class="bu">dict</span> <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb12-98"><a href="#cb12-98" aria-hidden="true" tabindex="-1"></a>                 area: pd.Series <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb12-99"><a href="#cb12-99" aria-hidden="true" tabindex="-1"></a>                 <span class="op">**</span>kwargs):</span>
+<span id="cb12-100"><a href="#cb12-100" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-101"><a href="#cb12-101" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 0. Проверка корректности пришедших данных</span></span>
+<span id="cb12-102"><a href="#cb12-102" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> <span class="bu">isinstance</span>(env, nx.Graph):</span>
+<span id="cb12-103"><a href="#cb12-103" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span> <span class="pp">TypeError</span>(<span class="st">"Тип аргумента `env` должен быть `Graph`!"</span>)</span>
+<span id="cb12-104"><a href="#cb12-104" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> <span class="bu">isinstance</span>(dynamic_nodes, <span class="bu">dict</span>):</span>
+<span id="cb12-105"><a href="#cb12-105" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span> <span class="pp">TypeError</span>(<span class="st">"Тип аргумента `dynamic_nodes` должен быть `dict`!"</span>)</span>
+<span id="cb12-106"><a href="#cb12-106" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> static_nodes <span class="kw">is</span> <span class="va">None</span> <span class="kw">and</span> <span class="kw">not</span> <span class="bu">isinstance</span>(static_nodes, <span class="bu">dict</span>):</span>
+<span id="cb12-107"><a href="#cb12-107" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span> <span class="pp">TypeError</span>(<span class="st">"Тип аргумента `static_nodes` должен быть `dict`!"</span>)</span>
+<span id="cb12-108"><a href="#cb12-108" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">len</span>(dynamic_nodes) <span class="op">&lt;</span> <span class="dv">2</span>:</span>
+<span id="cb12-109"><a href="#cb12-109" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="ss">f'Количество элементов `dynamic_nodes` не может быть меньше 2. Сейчас </span><span class="sc">{</span><span class="bu">len</span>(dynamic_nodes)<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb12-110"><a href="#cb12-110" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> area <span class="kw">is</span> <span class="va">None</span> <span class="kw">and</span> <span class="kw">not</span> <span class="bu">isinstance</span>(area, pd.Series):</span>
+<span id="cb12-111"><a href="#cb12-111" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span> <span class="pp">TypeError</span>(<span class="ss">f'Аргумент `area` должен иметь тип `pd.Series`! Имеет </span><span class="sc">{</span><span class="bu">type</span>(area)<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb12-112"><a href="#cb12-112" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-113"><a href="#cb12-113" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 1.1. Если статические узлы не указаны - заменяем значение переменной с None</span></span>
+<span id="cb12-114"><a href="#cb12-114" aria-hidden="true" tabindex="-1"></a>        <span class="co"># на {}</span></span>
+<span id="cb12-115"><a href="#cb12-115" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> static_nodes <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb12-116"><a href="#cb12-116" aria-hidden="true" tabindex="-1"></a>            static_nodes <span class="op">=</span> {}</span>
+<span id="cb12-117"><a href="#cb12-117" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-118"><a href="#cb12-118" aria-hidden="true" tabindex="-1"></a>        <span class="co"># ===================================== Генетический алгоритм ==============</span></span>
+<span id="cb12-119"><a href="#cb12-119" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 1. Создание стартовой популяции</span></span>
+<span id="cb12-120"><a href="#cb12-120" aria-hidden="true" tabindex="-1"></a>        population <span class="op">=</span> [dynamic_nodes <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="va">self</span>.population_size)]       </span>
+<span id="cb12-121"><a href="#cb12-121" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-122"><a href="#cb12-122" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Оценка приспособленности всех особей</span></span>
+<span id="cb12-123"><a href="#cb12-123" aria-hidden="true" tabindex="-1"></a>        bot_fit <span class="op">=</span> [<span class="va">self</span>._fit_function(env<span class="op">=</span>env,</span>
+<span id="cb12-124"><a href="#cb12-124" aria-hidden="true" tabindex="-1"></a>                                      nodes<span class="op">=</span>list_dict_concat(dn, static_nodes),</span>
+<span id="cb12-125"><a href="#cb12-125" aria-hidden="true" tabindex="-1"></a>                                      area<span class="op">=</span>area,</span>
+<span id="cb12-126"><a href="#cb12-126" aria-hidden="true" tabindex="-1"></a>                                      <span class="op">**</span>kwargs) <span class="cf">for</span> dn <span class="kw">in</span> population]</span>
+<span id="cb12-127"><a href="#cb12-127" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.metric_function.compare(<span class="dv">1</span>,<span class="dv">2</span>) <span class="op">==</span> <span class="dv">1</span>:        <span class="co"># Для минимизации:</span></span>
+<span id="cb12-128"><a href="#cb12-128" aria-hidden="true" tabindex="-1"></a>            max_val  <span class="op">=</span> <span class="bu">max</span>(bot_fit)</span>
+<span id="cb12-129"><a href="#cb12-129" aria-hidden="true" tabindex="-1"></a>            weights <span class="op">=</span> [<span class="fl">1.1</span><span class="op">*</span>max_val<span class="op">-</span>x <span class="cf">for</span> x <span class="kw">in</span> bot_fit]</span>
+<span id="cb12-130"><a href="#cb12-130" aria-hidden="true" tabindex="-1"></a>            best_metric <span class="op">=</span> <span class="bu">min</span>(bot_fit)</span>
+<span id="cb12-131"><a href="#cb12-131" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:                                           <span class="co"># Для максимизации:</span></span>
+<span id="cb12-132"><a href="#cb12-132" aria-hidden="true" tabindex="-1"></a>            weights <span class="op">=</span> bot_fit</span>
+<span id="cb12-133"><a href="#cb12-133" aria-hidden="true" tabindex="-1"></a>            best_metric <span class="op">=</span> <span class="bu">max</span>(bot_fit)</span>
+<span id="cb12-134"><a href="#cb12-134" aria-hidden="true" tabindex="-1"></a>        best_bot <span class="op">=</span> population[bot_fit.index(best_metric)]</span>
+<span id="cb12-135"><a href="#cb12-135" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-136"><a href="#cb12-136" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 2. На каждой эпохе</span></span>
+<span id="cb12-137"><a href="#cb12-137" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(<span class="va">self</span>.epochs):</span>
+<span id="cb12-138"><a href="#cb12-138" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-139"><a href="#cb12-139" aria-hidden="true" tabindex="-1"></a>            <span class="co"># 2.0 Элитарность</span></span>
+<span id="cb12-140"><a href="#cb12-140" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="va">self</span>.elite_size<span class="op">&gt;</span><span class="dv">0</span>:</span>
+<span id="cb12-141"><a href="#cb12-141" aria-hidden="true" tabindex="-1"></a>                <span class="co"># Определение весов</span></span>
+<span id="cb12-142"><a href="#cb12-142" aria-hidden="true" tabindex="-1"></a>                pop_weight <span class="op">=</span> pd.DataFrame({<span class="st">'w'</span>: weights, <span class="st">'p'</span>: population})</span>
+<span id="cb12-143"><a href="#cb12-143" aria-hidden="true" tabindex="-1"></a>                pop_weight <span class="op">=</span> pop_weight.sort_values(<span class="st">'w'</span>, ascending<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb12-144"><a href="#cb12-144" aria-hidden="true" tabindex="-1"></a>                pop_weight <span class="op">=</span> pop_weight.iloc[:<span class="va">self</span>.elite_size]</span>
+<span id="cb12-145"><a href="#cb12-145" aria-hidden="true" tabindex="-1"></a>                population <span class="op">=</span> pop_weight[<span class="st">'p'</span>].to_list()</span>
+<span id="cb12-146"><a href="#cb12-146" aria-hidden="true" tabindex="-1"></a>                weights <span class="op">=</span> pop_weight[<span class="st">'w'</span>].to_list()</span>
+<span id="cb12-147"><a href="#cb12-147" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-148"><a href="#cb12-148" aria-hidden="true" tabindex="-1"></a>                new_population <span class="op">=</span> population.copy()</span>
+<span id="cb12-149"><a href="#cb12-149" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span>:</span>
+<span id="cb12-150"><a href="#cb12-150" aria-hidden="true" tabindex="-1"></a>                new_population <span class="op">=</span> []</span>
+<span id="cb12-151"><a href="#cb12-151" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-152"><a href="#cb12-152" aria-hidden="true" tabindex="-1"></a>            <span class="co"># 2.1 Генерация новой популяции</span></span>
+<span id="cb12-153"><a href="#cb12-153" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="va">self</span>.population_size <span class="op">-</span> <span class="va">self</span>.elite_size):</span>
+<span id="cb12-154"><a href="#cb12-154" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-155"><a href="#cb12-155" aria-hidden="true" tabindex="-1"></a>                <span class="co"># Отбор по правилу рулетки</span></span>
+<span id="cb12-156"><a href="#cb12-156" aria-hidden="true" tabindex="-1"></a>                parent_bot_1 <span class="op">=</span> random.choices(population, weights<span class="op">=</span>weights)[<span class="dv">0</span>]</span>
+<span id="cb12-157"><a href="#cb12-157" aria-hidden="true" tabindex="-1"></a>                parent_bot_2 <span class="op">=</span> random.choices(population, weights<span class="op">=</span>weights)[<span class="dv">0</span>]</span>
+<span id="cb12-158"><a href="#cb12-158" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-159"><a href="#cb12-159" aria-hidden="true" tabindex="-1"></a>                <span class="co"># Скрещивание (одноточечное)</span></span>
+<span id="cb12-160"><a href="#cb12-160" aria-hidden="true" tabindex="-1"></a>                split_point <span class="op">=</span> <span class="bu">int</span>(<span class="bu">len</span>(parent_bot_1)<span class="op">/</span><span class="dv">2</span>)</span>
+<span id="cb12-161"><a href="#cb12-161" aria-hidden="true" tabindex="-1"></a>                left_gen_vals <span class="op">=</span> <span class="bu">list</span>(parent_bot_1.values())[:split_point]</span>
+<span id="cb12-162"><a href="#cb12-162" aria-hidden="true" tabindex="-1"></a>                right_gen_vals  <span class="op">=</span> <span class="bu">list</span>(parent_bot_1.values())[split_point:]</span>
+<span id="cb12-163"><a href="#cb12-163" aria-hidden="true" tabindex="-1"></a>                left_genome_part <span class="op">=</span> {k:v <span class="cf">for</span> k, v <span class="kw">in</span> parent_bot_1.items() <span class="cf">if</span> v <span class="kw">in</span> left_gen_vals}</span>
+<span id="cb12-164"><a href="#cb12-164" aria-hidden="true" tabindex="-1"></a>                right_genome_part <span class="op">=</span> {k:v <span class="cf">for</span> k, v <span class="kw">in</span> parent_bot_2.items() <span class="cf">if</span> v <span class="kw">in</span> right_gen_vals}</span>
+<span id="cb12-165"><a href="#cb12-165" aria-hidden="true" tabindex="-1"></a>                new_dynamic_nodes <span class="op">=</span> {<span class="op">**</span>left_genome_part, <span class="op">**</span>right_genome_part}</span>
+<span id="cb12-166"><a href="#cb12-166" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-167"><a href="#cb12-167" aria-hidden="true" tabindex="-1"></a>                <span class="co"># Мутация (выбор произвольного узла)</span></span>
+<span id="cb12-168"><a href="#cb12-168" aria-hidden="true" tabindex="-1"></a>                new_dynamic_nodes <span class="op">=</span> <span class="va">self</span>._mutate(env<span class="op">=</span>env,</span>
+<span id="cb12-169"><a href="#cb12-169" aria-hidden="true" tabindex="-1"></a>                                                 new_dynamic_nodes<span class="op">=</span>new_dynamic_nodes,</span>
+<span id="cb12-170"><a href="#cb12-170" aria-hidden="true" tabindex="-1"></a>                                                 area<span class="op">=</span>area)</span>
+<span id="cb12-171"><a href="#cb12-171" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-172"><a href="#cb12-172" aria-hidden="true" tabindex="-1"></a>                <span class="co"># Добавляем его в новую популяцию</span></span>
+<span id="cb12-173"><a href="#cb12-173" aria-hidden="true" tabindex="-1"></a>                new_population.append(new_dynamic_nodes)</span>
+<span id="cb12-174"><a href="#cb12-174" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-175"><a href="#cb12-175" aria-hidden="true" tabindex="-1"></a>            <span class="co"># 2.2 Заменяем предыдущую популяцию новой</span></span>
+<span id="cb12-176"><a href="#cb12-176" aria-hidden="true" tabindex="-1"></a>            population <span class="op">=</span> new_population</span>
+<span id="cb12-177"><a href="#cb12-177" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-178"><a href="#cb12-178" aria-hidden="true" tabindex="-1"></a>            <span class="co"># 2.3 Оценка приспособленности всех особей</span></span>
+<span id="cb12-179"><a href="#cb12-179" aria-hidden="true" tabindex="-1"></a>            bot_fit <span class="op">=</span> [<span class="va">self</span>._fit_function(env <span class="op">=</span> env,</span>
+<span id="cb12-180"><a href="#cb12-180" aria-hidden="true" tabindex="-1"></a>                                      nodes   <span class="op">=</span> list_dict_concat(dn, static_nodes),</span>
+<span id="cb12-181"><a href="#cb12-181" aria-hidden="true" tabindex="-1"></a>                                      area    <span class="op">=</span> area,</span>
+<span id="cb12-182"><a href="#cb12-182" aria-hidden="true" tabindex="-1"></a>                                      <span class="op">**</span>kwargs) <span class="cf">for</span> dn <span class="kw">in</span> population]</span>
+<span id="cb12-183"><a href="#cb12-183" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-184"><a href="#cb12-184" aria-hidden="true" tabindex="-1"></a>            <span class="co"># 2.4 Определение лучшего на эпохе значения метрики</span></span>
+<span id="cb12-185"><a href="#cb12-185" aria-hidden="true" tabindex="-1"></a>            <span class="co"># и весов в зависимости от приспособленности        </span></span>
+<span id="cb12-186"><a href="#cb12-186" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="va">self</span>.metric_function.compare(<span class="dv">1</span>,<span class="dv">2</span>)<span class="op">==</span><span class="dv">1</span>:    <span class="co"># Для минимизации:</span></span>
+<span id="cb12-187"><a href="#cb12-187" aria-hidden="true" tabindex="-1"></a>                max_val  <span class="op">=</span> <span class="bu">max</span>(bot_fit)</span>
+<span id="cb12-188"><a href="#cb12-188" aria-hidden="true" tabindex="-1"></a>                weights <span class="op">=</span> [<span class="fl">1.1</span><span class="op">*</span>max_val<span class="op">-</span>x <span class="cf">for</span> x <span class="kw">in</span> bot_fit]</span>
+<span id="cb12-189"><a href="#cb12-189" aria-hidden="true" tabindex="-1"></a>                cur_metric <span class="op">=</span> <span class="bu">min</span>(bot_fit)</span>
+<span id="cb12-190"><a href="#cb12-190" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span>:                                       <span class="co"># Для максимизации</span></span>
+<span id="cb12-191"><a href="#cb12-191" aria-hidden="true" tabindex="-1"></a>                weights <span class="op">=</span> bot_fit</span>
+<span id="cb12-192"><a href="#cb12-192" aria-hidden="true" tabindex="-1"></a>                cur_metric <span class="op">=</span> <span class="bu">max</span>(bot_fit)</span>
+<span id="cb12-193"><a href="#cb12-193" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb12-194"><a href="#cb12-194" aria-hidden="true" tabindex="-1"></a>            <span class="co"># 2.5 Нормализация весов (для более выраженной точности расчета)</span></span>
+<span id="cb12-195"><a href="#cb12-195" aria-hidden="true" tabindex="-1"></a>            weights <span class="op">=</span> (weights <span class="op">-</span> np.<span class="bu">min</span>(weights)) <span class="op">/</span> (np.<span class="bu">max</span>(weights) <span class="op">-</span> np.<span class="bu">min</span>(weights))</span>
+<span id="cb12-196"><a href="#cb12-196" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-197"><a href="#cb12-197" aria-hidden="true" tabindex="-1"></a>            <span class="co"># 2.6 Определяем лучше ли лучшее на эпохе решение чем имеющееся</span></span>
+<span id="cb12-198"><a href="#cb12-198" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="va">self</span>.metric_function.compare(best_metric, cur_metric) <span class="op">==</span> cur_metric:</span>
+<span id="cb12-199"><a href="#cb12-199" aria-hidden="true" tabindex="-1"></a>                best_bot <span class="op">=</span> population[bot_fit.index(cur_metric)]</span>
+<span id="cb12-200"><a href="#cb12-200" aria-hidden="true" tabindex="-1"></a>                best_metric  <span class="op">=</span> cur_metric</span>
+<span id="cb12-201"><a href="#cb12-201" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-202"><a href="#cb12-202" aria-hidden="true" tabindex="-1"></a>            <span class="co"># 2.7 Выполнение функции окончания расчета на эпохе</span></span>
+<span id="cb12-203"><a href="#cb12-203" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="va">self</span>.epoch_end_function:</span>
+<span id="cb12-204"><a href="#cb12-204" aria-hidden="true" tabindex="-1"></a>                <span class="va">self</span>.epoch_end_function(epoch<span class="op">=</span>epoch,</span>
+<span id="cb12-205"><a href="#cb12-205" aria-hidden="true" tabindex="-1"></a>                                        best_metric<span class="op">=</span>best_metric,</span>
+<span id="cb12-206"><a href="#cb12-206" aria-hidden="true" tabindex="-1"></a>                                        cur_metric<span class="op">=</span>cur_metric,</span>
+<span id="cb12-207"><a href="#cb12-207" aria-hidden="true" tabindex="-1"></a>                                        best_bot<span class="op">=</span>best_bot)</span>
+<span id="cb12-208"><a href="#cb12-208" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-209"><a href="#cb12-209" aria-hidden="true" tabindex="-1"></a>            <span class="co"># 2.8 Если достигнута цель расчета, выходим из цикла</span></span>
+<span id="cb12-210"><a href="#cb12-210" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="va">self</span>.stop_case_function:</span>
+<span id="cb12-211"><a href="#cb12-211" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> <span class="va">self</span>.stop_case_function(value<span class="op">=</span>best_metric,</span>
+<span id="cb12-212"><a href="#cb12-212" aria-hidden="true" tabindex="-1"></a>                            iteration<span class="op">=</span>epoch,</span>
+<span id="cb12-213"><a href="#cb12-213" aria-hidden="true" tabindex="-1"></a>                            best_metric<span class="op">=</span>best_metric,</span>
+<span id="cb12-214"><a href="#cb12-214" aria-hidden="true" tabindex="-1"></a>                            dynamic_nodes<span class="op">=</span>best_bot,</span>
+<span id="cb12-215"><a href="#cb12-215" aria-hidden="true" tabindex="-1"></a>                            static_nodes<span class="op">=</span>static_nodes):</span>
+<span id="cb12-216"><a href="#cb12-216" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">break</span></span>
+<span id="cb12-217"><a href="#cb12-217" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-218"><a href="#cb12-218" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> best_bot, best_metric</span></code><button title="Скопировать текст" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Проверим работоспособность функции</p>
+<div id="cell-25" class="cell" data-execution_count="83">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> genesis.point_selectors <span class="im">import</span> RandomNodesSelector</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>state <span class="op">=</span> FirstArrivalUnitState()</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>selector <span class="op">=</span> RandomNodesSelector()</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Использеум разработанную выше метрику неравномерности нагрузки на ПСЧ</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>metric <span class="op">=</span> StdIndex()</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Инициализация алгоритма</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>mclp <span class="op">=</span> BestNodesGA2(</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    state_function     <span class="op">=</span> state,</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    metric_function    <span class="op">=</span> metric,</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    node_selector      <span class="op">=</span> selector,</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    population_size    <span class="op">=</span> <span class="dv">50</span>,</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    epochs             <span class="op">=</span> <span class="dv">15</span>,</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    mutation_max_count <span class="op">=</span> <span class="dv">2</span>,</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>    epoch_end_function <span class="op">=</span> <span class="kw">lambda</span> epoch, best_metric, <span class="op">**</span>kwargs: <span class="bu">print</span>(<span class="ss">f"Эпоха: </span><span class="sc">{</span>epoch<span class="sc">}</span><span class="ss">, Лучшее значение метрики: </span><span class="sc">{</span>best_metric<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Формированеи стартовой дислокации</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>g_nodes_list <span class="op">=</span> <span class="bu">list</span>(G.nodes())</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>start_points <span class="op">=</span> {</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>    g_nodes_list[<span class="dv">1000</span>]: <span class="st">'псч 1'</span>,</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>    g_nodes_list[<span class="dv">2000</span>]: <span class="st">'псч 2'</span>,</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>    g_nodes_list[<span class="dv">3000</span>]: <span class="st">'псч 3'</span>,</span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>    g_nodes_list[<span class="dv">4000</span>]: <span class="st">'псч 4'</span>,</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Запуск алгоритма</span></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>best_nodes, best_metric <span class="op">=</span> mclp(</span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>    env           <span class="op">=</span> G,</span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>    dynamic_nodes <span class="op">=</span> start_points)</span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a><span class="co"># Анализ исходной дислокации</span></span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>times, nearest <span class="op">=</span> state(env<span class="op">=</span>G, points<span class="op">=</span>start_points)</span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a><span class="co"># Анализ полученной дислокации</span></span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>times1, nearest1 <span class="op">=</span> state(env<span class="op">=</span>G, points<span class="op">=</span>best_nodes)</span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Исходная неравномерность нагрузки на ПСЧ:               </span><span class="sc">{</span>metric(nearest)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Полученная неравномерность нагрузки на ПСЧ:             </span><span class="sc">{</span>metric(nearest1)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Исходное среднее время прибытия в любую точку города:   </span><span class="sc">{</span>ArrivalTime()(times)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Полученное среднее время прибытия в любую точку города: </span><span class="sc">{</span>ArrivalTime()(times1)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a><span class="co"># Печать результатов</span></span>
+<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a>g_nodes <span class="op">=</span> ox.graph_to_gdfs(G, edges<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a>g_nodes <span class="op">=</span> g_nodes.merge(nearest, left_index<span class="op">=</span><span class="va">True</span>, right_index<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a>g_nodes1 <span class="op">=</span> ox.graph_to_gdfs(G, edges<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a>g_nodes1 <span class="op">=</span> g_nodes1.merge(nearest1, left_index<span class="op">=</span><span class="va">True</span>, right_index<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a><span class="co"># Подготовка холста для 2 карт</span></span>
+<span id="cb13-50"><a href="#cb13-50" aria-hidden="true" tabindex="-1"></a>fig, (ax1, ax2) <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">16</span>,<span class="dv">8</span>), tight_layout<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb13-51"><a href="#cb13-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-52"><a href="#cb13-52" aria-hidden="true" tabindex="-1"></a><span class="co"># Карта исходного распределения</span></span>
+<span id="cb13-53"><a href="#cb13-53" aria-hidden="true" tabindex="-1"></a>borders.plot(ax<span class="op">=</span>ax1, color<span class="op">=</span><span class="st">'#fcfcd9'</span>, edgecolor<span class="op">=</span><span class="st">'black'</span>)</span>
+<span id="cb13-54"><a href="#cb13-54" aria-hidden="true" tabindex="-1"></a>ox.plot_graph(G, node_size<span class="op">=</span><span class="dv">0</span>, edge_linewidth<span class="op">=</span><span class="fl">0.2</span>, edge_color<span class="op">=</span><span class="st">'gray'</span>, ax<span class="op">=</span>ax1, close<span class="op">=</span><span class="va">False</span>, show<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb13-55"><a href="#cb13-55" aria-hidden="true" tabindex="-1"></a>g_nodes.plot(ax<span class="op">=</span>ax1, column<span class="op">=</span><span class="st">'nearest'</span>, markersize<span class="op">=</span><span class="dv">1</span>) </span>
+<span id="cb13-56"><a href="#cb13-56" aria-hidden="true" tabindex="-1"></a>g_nodes.loc[start_points.keys()].plot(ax<span class="op">=</span>ax1, facecolors<span class="op">=</span><span class="st">'r'</span>, edgecolors<span class="op">=</span><span class="st">'k'</span>, markersize<span class="op">=</span><span class="dv">50</span>)</span>
+<span id="cb13-57"><a href="#cb13-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-58"><a href="#cb13-58" aria-hidden="true" tabindex="-1"></a><span class="co"># Карта итогового распределения</span></span>
+<span id="cb13-59"><a href="#cb13-59" aria-hidden="true" tabindex="-1"></a>borders.plot(ax<span class="op">=</span>ax2, color<span class="op">=</span><span class="st">'#fcfcd9'</span>, edgecolor<span class="op">=</span><span class="st">'black'</span>)</span>
+<span id="cb13-60"><a href="#cb13-60" aria-hidden="true" tabindex="-1"></a>ox.plot_graph(G, node_size<span class="op">=</span><span class="dv">0</span>, edge_linewidth<span class="op">=</span><span class="fl">0.2</span>, edge_color<span class="op">=</span><span class="st">'gray'</span>, ax<span class="op">=</span>ax2, close<span class="op">=</span><span class="va">False</span>, show<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb13-61"><a href="#cb13-61" aria-hidden="true" tabindex="-1"></a>g_nodes1.plot(ax<span class="op">=</span>ax2, column<span class="op">=</span><span class="st">'nearest'</span>, markersize<span class="op">=</span><span class="dv">1</span>) </span>
+<span id="cb13-62"><a href="#cb13-62" aria-hidden="true" tabindex="-1"></a>g_nodes1.loc[best_nodes.keys()].plot(ax<span class="op">=</span>ax2, facecolors<span class="op">=</span><span class="st">'r'</span>, edgecolors<span class="op">=</span><span class="st">'k'</span>, markersize<span class="op">=</span><span class="dv">50</span>)</span>
+<span id="cb13-63"><a href="#cb13-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-64"><a href="#cb13-64" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Скопировать текст" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Эпоха: 0, Лучшее значение метрики: 1837.1226369878887
+Эпоха: 1, Лучшее значение метрики: 1837.1226369878887
+Эпоха: 2, Лучшее значение метрики: 1024.1508271083253
+Эпоха: 3, Лучшее значение метрики: 1024.1508271083253
+Эпоха: 4, Лучшее значение метрики: 993.4228287424578
+Эпоха: 5, Лучшее значение метрики: 780.7229021874534
+Эпоха: 6, Лучшее значение метрики: 780.7229021874534
+Эпоха: 7, Лучшее значение метрики: 697.2834789380859
+Эпоха: 8, Лучшее значение метрики: 697.2834789380859
+Эпоха: 9, Лучшее значение метрики: 697.2834789380859
+Эпоха: 10, Лучшее значение метрики: 437.25612250335234
+Эпоха: 11, Лучшее значение метрики: 437.25612250335234
+Эпоха: 12, Лучшее значение метрики: 437.25612250335234
+Эпоха: 13, Лучшее значение метрики: 437.25612250335234
+Эпоха: 14, Лучшее значение метрики: 437.25612250335234
+Исходная неравномерность нагрузки на ПСЧ:               5333.579621917473
+Полученная неравномерность нагрузки на ПСЧ:             437.25612250335234
+Исходное среднее время прибытия в любую точку города:   12.456412339072285
+Полученное среднее время прибытия в любую точку города: 12.217114056692857</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="470_custom_classes_files/figure-html/cell-10-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Скопировано");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Скопировано");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../pages/465_tools.html" class="pagination-link" aria-label="Инструменты обработки используемые в расчетах">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Инструменты обработки используемые в расчетах</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../pages/480_hybridization.html" class="pagination-link" aria-label="Гибридизация алгоритмов">
+        <span class="nav-page-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Гибридизация алгоритмов</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.dev/Obsidian-pb/genesis/blob/main/pages/470_custom_classes.ipynb" class="toc-action"><i class="bi bi-github"></i>Редактировать страницу</a></li></ul></div></div></div></footer></body></html>
