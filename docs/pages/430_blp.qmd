@@ -1,0 +1,244 @@
+# Определение наилучшей дислокации единственного подразделения (BLP)
+
+Первой и простейшей задачей размещения подразделений пожарной охраны является Задача определения наилучшей дислокации единственного подразделения (далее – **BLP**, от англ. *Best Location Problem*).
+
+В общем виде процесс решения задачи BLP можно представить следующим образом:
+
+```{mermaid}
+flowchart LR
+
+  model("**МОДЕЛИРОВАНИЕ
+          ПАРАМЕТРОВ
+          ПРИБЫТИЯ**")
+  
+  result["**РЕЗУЛЬТАТЫ**"]
+
+  analyze("**АНАЛИЗ**
+        ---
+        Время прибытия
+        ---
+        Индекс прикрытия")
+
+  metrics["**МЕТРИКИ**"]
+
+  blp_algs["**ЭВРИСТИЧЕСКИЕ АЛГОРИТМЫ BLP**
+        ---
+        ADD
+        ---
+        Полный перебор, HC, MSA, ABC"]
+
+  blp("**ВЫБОР ДИСЛОКАЦИИ**")
+        
+  model --> result
+  metrics --> analyze
+  result --> analyze
+  analyze --> blp
+  blp_algs --> blp
+  blp --> model
+
+```
+
+Поиск наилучшей дислокации подразумевает выдвижение гипотез о размещении подразделений и моделирование параметров реагирования прибытия, после чего на основании проведенного анализа делается вывод о том, насколько предложенное размещение подразделений оптимально.
+
+В **Генезис** реализованы следующие алгоритмы решения задачи BLP:
+
+- `genesis.best_points.BestNodesFull` Полный перебор
+- `genesis.best_points.BestNodeHillClimbing` Скалолаз (HC)
+- `genesis.best_points.BestNodeHillClimbing_maxMean` Скалолаз (HC), модификация для метрик максимальное время + среднее время
+- `genesis.best_points.BestNodeMonkey` Алгоритм обезьяньего поиска (MSA)
+- `genesis.best_points.BestNodeBee` Алгоритм искусственной пчелиной колонии (ABC)
+
+ 
+
+## BestNodesFull
+
+Полный перебор всех узлов графа для поиска тех, из которых достигается наилучшая метрика покрытия.
+
+### Область применения
+- Поиск одного оптимального узла с максимальным охватом.
+- Подходит для небольших и средних по размеру графов.
+- Гарантирует точное решение, но требует большого времени на вычисления.
+
+### Конструктор
+
+```python
+BestNodesFull(
+    state_function: StateBase,
+    metric_function: MetricBase,
+    appr_val: float = 0.95,
+    return_list: bool = False,
+    node_calc_end_function: Callable = None,
+    **kwargs
+)
+```
+
+- **state_function** (`StateBase`): функция расчёта состояния среды (времён до всех узлов).  
+- **metric_function** (`MetricBase`): функция оценки состояния (например, среднее или максимальное время).  
+- **appr_val** (`float`): доля достижимых узлов (0–1), ниже которой узел не считается допустимым.  
+- **return_list** (`bool`): если `True`, возвращает список всех лучших узлов; иначе — только первый лучший.  
+- **node_calc_end_function** (`Callable`): опциональная функция, вызываемая после расчёта каждого узла.
+
+### Вызов
+
+```python
+best_node, best_metric = BestNodesFull(...)(env, area=None, start_point=None, points_list=None)
+```
+
+- **env** (`networkx.Graph`): граф дорожной сети.  
+- **area** (`pd.Series`, опционально): логическая маска целевых узлов.  
+- **start_point**: не используется.  
+- **points_list** (`set[int]`, опционально): множество кандидатов; по умолчанию — все узлы.
+
+**Возвращает**  
+- `best_node` (`int` или `list[int]`): идентификатор (или список) лучшего узла(ов).  
+- `best_metric` (`float`): значение метрики.
+
+---
+
+## BestNodeHillClimbing
+
+Поиск оптимального узла алгоритмом «скалолаза» (hill climbing) в окрестности узлов с учётом краевых связей.
+
+### Область применения
+- Эффективен на средних и крупных графах.
+- Быстрее полного перебора, но может застревать в локальных оптимумах.
+
+### Конструктор
+
+```python
+BestNodeHillClimbing(
+    state_function: StateBase,
+    metric_function: MetricBase,
+    appr_val: float = 0.95,
+    all_neighbors: bool = True,
+    node_calc_end_function: Callable = None,
+    **kwargs
+)
+```
+
+- **all_neighbors** (`bool`): если `True`, рассматриваются все смежные узлы; иначе — только исходящие.
+
+### Вызов
+
+```python
+best_node, best_metric = BestNodeHillClimbing(...)(env, area=None, start_point=None, points_list=None)
+```
+
+- **start_point** (`int`, опционально): начальный узел; если не задан, подбирается первый связный.  
+- Прочие параметры как в `BestNodesFull`.
+
+**Возвращает**  
+- `best_node` (`int`): идентификатор лучшего узла.  
+- `best_metric` (`float`): значение метрики.
+
+---
+
+## BestNodesHalfDiameter
+
+Приближённый метод: выбор узла, лежащего около середины диаметра графа.
+
+### Область применения
+- Быстрый эвристический метод для предварительной оценки.
+- Может служить стартовой точкой для других алгоритмов.
+
+### Конструктор
+
+```python
+BestNodesHalfDiameter(
+    state_function: StateBase = None,
+    metric_function: MetricBase = None,
+    weight: str | Callable = "travel_time",
+    **kwargs
+)
+```
+
+- **weight** (`str` или `Callable`): имя атрибута ребра или функция для вычисления веса.
+
+### Вызов
+
+```python
+node, _ = BestNodesHalfDiameter(...)(env, area=None)
+```
+
+- **env** (`networkx.Graph`): входной граф.
+- **area** не используется.
+
+**Возвращает**  
+- `node` (`int`): узел, лежащий примерно посередине кратчайшего пути между двумя «угловыми» узлами.  
+- Метрика всегда `None`.
+
+---
+
+## BestNodeMonkey
+
+Алгоритм «обезьяньего поиска» (Monkey Search Algorithm): сочетает глобальные и локальные случайные прыжки с «подъёмом на гору».
+
+### Область применения
+- Хорошо подходит для больших графов с несколькими локальными оптимумами.
+
+### Конструктор
+
+```python
+BestNodeMonkey(
+    state_function: StateBase,
+    metric_function: MetricBase,
+    appr_val: float = 0.95,
+    all_neighbors: bool = True,
+    global_jumps_count: int = 3,
+    local_jumps_count: int = 10,
+    local_jump_max_distance: float = 1000,
+    after_global_jump_function: Callable = None,
+    after_local_jump_function: Callable = None,
+    **kwargs
+)
+```
+
+- **global_jumps_count** (`int`): число глобальных случайных стартов.  
+- **local_jumps_count** (`int`): число локальных повторных запусков hill climbing.  
+- **local_jump_max_distance** (`float`): радиус локального буфера для прыжков.  
+
+### Вызов
+
+```python
+best_node, best_metric = BestNodeMonkey(...)(env, area=None, start_point=None, points_list=None)
+```
+
+**Возвращает**  
+- `best_node` (`int`): найденный оптимальный узел.  
+- `best_metric` (`float`): значение метрики.
+
+---
+
+## BestNodeBee
+
+Алгоритм «пчелиной колонии» (Artificial Bee Colony, ABC): разведчики выбирают стартовые узлы, затем вокруг лучших проводится hill climbing.
+
+### Область применения
+- Альтернатива Monkey Search с коллективным разведывательным этапом.
+
+### Конструктор
+
+```python
+BestNodeBee(
+    state_function: StateBase,
+    metric_function: MetricBase,
+    appr_val: float = 0.95,
+    all_neighbors: bool = True,
+    scouts_count: int = 100,
+    best_scouts_count: int = 5,
+    **kwargs
+)
+```
+
+- **scouts_count** (`int`): число случайных «разведчиков».  
+- **best_scouts_count** (`int`): число лучших разведчиков для дальнейшей оптимизации.
+
+### Вызов
+
+```python
+best_node, best_metric = BestNodeBee(...)(env, area=None, start_point=None, points_list=None)
+```
+
+**Возвращает**  
+- `best_node` (`int`): оптимальный узел.  
+- `best_metric` (`float`): значение метрики.

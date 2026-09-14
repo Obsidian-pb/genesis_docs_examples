@@ -1,0 +1,8 @@
+# Полезные ссылки {.unnumbered}
+
+1. [https://docs.qgis.org/3.40/ru/docs/index.html](https://docs.qgis.org/3.40/ru/docs/index.html) Официальная документация QGIS
+2. [https://osmnx.readthedocs.io/](https://osmnx.readthedocs.io/) Официальная документация OSMNX
+3. [https://geopandas.org](https://geopandas.org) Официальная документация GeoPandas
+4. [https://education.yandex.ru/handbook/python/article/modul-pandas](https://education.yandex.ru/handbook/python/article/modul-pandas) Хендбук Яндекс Основы Python
+5. [https://habr.com/ru/companies/ruvds/articles/494720/](https://habr.com/ru/companies/ruvds/articles/494720/) Хабр: Шпаргалка по pandas
+6. [https://wiki.openstreetmap.org/wiki/Map_features](https://wiki.openstreetmap.org/wiki/Map_features) Список тегов OpenStreetMap и их описание

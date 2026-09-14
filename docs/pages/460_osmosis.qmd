@@ -1,0 +1,139 @@
+# Работа с большими массивами данных в Osmosis
+
+При работе с большими массивами данных - например пространственными данными для стран, регионов или крпных территориальных единиц - могут возникать проблемы с выгрузкой данных из OpenStreetMap с использованием инструментов OSMnx. Проблемы возникают из-за ограничений на размер файлов, которые могут быть обработаны в рамках одной сессии. 
+
+В таких случаях рекомендуется использовать инструмент Osmosis. Данное консольное приложение позволяет обрабатывать большие объемы данных, используя многопоточность и параллельные вычисления. Это позволяет эффективно манипулировать большими объемами данных на локальных ПК не прибегая к сторонним сервисам.
+
+Osmosis оперирует файлами в форматах `.osm.pbf`. Наиболее универсальным источником данных является сервис [Geofabrik](https://download.geofabrik.de/).
+
+Ниже приведено подробное **руководство по установке и основным способам использования приложения Osmosis** на операционной системе **Windows**, основанное на информации с официальной страницы:  
+[https://wiki.openstreetmap.org/wiki/Osmosis/Quick_Install_(Windows)](https://wiki.openstreetmap.org/wiki/Osmosis/Quick_Install_(Windows))
+
+---
+
+## 📦 Установка Osmosis на Windows
+
+### 1. Установите Java (JRE)
+
+Для работы Osmosis требуется установленная **Java Runtime Environment (JRE)**.
+
+#### Проверьте, установлен ли Java:
+1. Откройте командную строку (нажмите Win + R → введите `cmd` → Enter)
+2. Введите команду:
+   ```bash
+   java -version
+   ```
+3. Если отобразится версия Java — всё готово.
+4. Если нет — скачайте JRE с официального сайта:  
+   [https://www.java.com/en/download/](https://www.java.com/en/download/)  
+   Затем запустите установщик и следуйте инструкциям.
+
+---
+
+### 2. Скачайте Osmosis
+
+1. Перейдите на страницу релизов Osmosis на GitHub:  
+   [https://github.com/openstreetmap/osmosis/releases](https://github.com/openstreetmap/osmosis/releases)
+2. Найдите архив с названием `osmosis-<version>.zip` (настоятельно рекомендуется использовать версию, `osmosis-0.48.3.zip`)
+3. Скачайте его и сохраните в удобное место (например, на рабочий стол)
+
+---
+
+### 3. Распакуйте архив
+
+1. Распакуйте архив с помощью WinRAR, 7-Zip или проводника Windows.
+2. Удалите внешнюю папку `osmosis-latest`, если она есть.
+3. Переименуйте внутреннюю папку, убрав номер версии (например, из `osmosis-0.48.3` сделать просто `osmosis`)
+4. Переместите папку в удобное место, например:
+   ```
+   C:\Program Files (x86)\osmosis
+   ```
+
+---
+
+### 4. Создайте ярлык для запуска Osmosis
+
+#### Способ 1: Простой запуск через `.bat` файл
+
+1. Создайте текстовый файл и назовите его, например: `run_osmosis.bat`
+2. Откройте его в Блокноте и вставьте следующую строку:
+   ```
+   "C:\Program Files (x86)\osmosis\bin\osmosis.bat"
+   ```
+   > Обязательно используйте кавычки, так как в пути есть пробелы.
+
+3. Сохраните файл и дважды кликните по нему — должно открыться окно командной строки и закрыться.
+
+#### Способ 2: Оставить окно открытым для просмотра вывода
+
+1. Создайте ярлык на рабочем столе.
+2. Щелкните правой кнопкой мыши → **Свойства**.
+3. На вкладке **Ярлык** измените поле **Объект** на:
+   ```
+   cmd /k "C:\Program Files (x86)\osmosis\bin\osmosis.bat"
+   ```
+4. Теперь при запуске вы сможете видеть логи выполнения Osmosis.
+
+
+---
+
+## 🛠️ Основные способы использования Osmosis
+
+Osmosis — это мощный инструмент для обработки данных OpenStreetMap (OSM). Он позволяет фильтровать, объединять и преобразовывать данные в форматах `.osm.pbf`, `.osm.bz2` и др.
+
+
+### 1. Получение исходных данных
+
+Для получения исходных данных можно воспользоваться сервисом [Geofabrik](https://download.geofabrik.de/). Для получения данных по конкретной стране, необходимо выбрать её в списке и нажать на кнопку `Download`.
+
+
+### 2. Получение файла pbf в котором остались только данные о дорогах
+
+```bash
+osmosis --read-pbf russia-latest.osm.pbf --tf accept-ways highway=motorway,motorway_link,trunk,trunk_link,primary,primary_link,secondary,secondary_link,road,unclassified,tertiary,tertiary_link,living_street,service,residential,corridor,cycleway --tf reject-ways motor_vehicle=no motorcar=no --tf reject-relations --used-node --write-pbf highways-russia.pbf
+```
+
+### 3. Обрезка по полигону региона
+
+Используются полигоны в формате `.poly`. Полигоны можно создать с использованием расширения для QGIS: [`OSMPOLY_export`](https://docs.nextgis.ru/docs_ngqgis/source/osmpoly_export.html?ysclid=mbhr3vklq6481238900)
+
+В примере ниже используется полигон границ *Томской области*.
+
+```bash
+osmosis --read-pbf file=highways-russia.pbf --bounding-polygon file=Tomskaya_oblast.poly completeWays=yes --used-node --write-xml file=highways-tomskaya-obl.osm
+```
+
+В результате в папке `osmosis/bin` появится файл `highways-tomskaya-obl.osm` в котором остались только данные о дорогах, которые в дальнейшем можно использовать для построения графа. Этот файл в дальнейшем может быть загружен как ГДС при помощи функции `osmnx`:
+
+```{.python}
+G = ox.graph_from_xml('osmosis/bin/highways-tomskaya-obl.osm', retain_all=True, simplify=False)
+```
+
+### 4. Обрезка по границам прямоугольника
+
+```bash
+osmosis --read-pbf file=highways-russia.pbf --bounding-box bottom=55.1421745 top=56.0212238 left=36.8031012 right=37.268302 completeWays=yes --used-node --write-xml file=Moscow_bb.osm
+```
+
+### 5. Выгрузка границ муниципальных образований
+
+```bash
+osmosis --read-pbf russia-latest.osm.pbf --tf accept-relations boundary=administrative admin_level=4,6 --write-pbf bounds-4-6-russia.pbf
+```
+
+
+### 6. Выгрузка границ населенных пунктов
+
+```bash
+osmosis --read-pbf russia-latest.osm.pbf --tf accept-relations place=city,town,village,hamlet,suburb,quarter,neighbourhood,island --write-pbf places-russia.pbf
+```
+
+
+
+---
+
+## 📚 Полезные ссылки
+
+- Документация: [https://wiki.openstreetmap.org/wiki/Osmosis](https://wiki.openstreetmap.org/wiki/Osmosis)
+- Примеры использования: [https://wiki.openstreetmap.org/wiki/Osmosis/Examples](https://wiki.openstreetmap.org/wiki/Osmosis/Examples)
+- Форум помощи: [http://help.openstreetmap.org](http://help.openstreetmap.org)

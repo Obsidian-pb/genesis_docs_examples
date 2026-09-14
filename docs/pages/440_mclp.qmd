@@ -1,0 +1,289 @@
+# Задача определения наилучшей дислокации множества подразделений (MCLP)
+
+В общем виде процесс решения задачи определения наилучшей дислокации множества подразделений можно представить следующим образом:
+
+```{mermaid}
+flowchart LR
+
+  model("**МОДЕЛИРОВАНИЕ
+          ПАРАМЕТРОВ
+          ПРИБЫТИЯ**")
+  
+  result["**РЕЗУЛЬТАТЫ**"]
+
+  analyze("**АНАЛИЗ**
+        ---
+        Время прибытия
+        ---
+        Индекс прикрытия")
+
+  metrics["**МЕТРИКИ**"]
+
+  blp_algs["**ЭВРИСТИЧЕСКИЕ АЛГОРИТМЫ MCLP**
+        ---
+        ADD
+        ---
+        GNS, GA, SAA, GA+GNS"]
+
+  blp("**ВЫБОР ДИСЛОКАЦИИ**")
+        
+  model --> result
+  metrics --> analyze
+  result --> analyze
+  analyze --> blp
+  blp_algs --> blp
+  blp --> model
+
+```
+
+Поиск наилучшей дислокации подразумевает выдвижение гипотез о размещении подразделений и моделирование параметров реагирования прибытия, после чего на основании проведенного анализа делается вывод о том, насколько предложенное размещение подразделений оптимально.
+
+В **Генезис** реализованы следующие алгоритмы решения задачи MCLP:
+
+- `genesis.mclp.BestNodesKoptG` Модульный алгоритм Генезис (GNS)
+- `genesis.mclp.BestNodesGA` Генетический алгоритм (GA)
+- `genesis.mclp.BestNodesSA` Алгоритм имитации отжига (SAA)
+- `fire_units.mclp.BestNodesGAKopt` Гибридный алгоритм Генетический алгоритм + Генезис (GA+GNS)
+
+Реализован также ряд дополнительных алгоритмов описываемых в разделе **Для разработчиков**.
+
+## BestNodesKoptG
+
+Поиск лучших узлов для размещения n объектов.  
+Расчет производится алгоритмом k-mean, адаптированным для расчета в графовом пространстве и абстрагированным от применения метрики mean (среднее).
+
+### Область применения
+
+- Определение размещения множества узлов в графе, при котором обеспечиваются наилучшие некоторые целевые метрики.  
+- Дает достаточно точное решение.  
+- Хорошо подходит для больших графов.  
+
+### Конструктор
+
+```python
+BestNodesKoptG(
+    state_function: StateBase,
+    metric_function: MetricBase,
+    best_point_function: BestPointsBase,
+    iterations: int = 5,
+    appr_val_in_area: int = 0,
+    before_iters_start_function: callable = None,
+    iter_calc_end_function: callable = None,
+    stop_case_function: callable = None,
+    **kwargs
+)
+```
+
+- **state_function** (`StateBase`): функция расчета состояния окружения  
+- **metric_function** (`MetricBase`): Функция расчета метрики  
+- **best_point_function** (`BestPointsBase`): Функция расчета лучшего размещения узла  
+- **iterations** (`int`): Количество итераций расчета  
+- **appr_val_in_area** (`int`):  
+  Доля узлов графа в пределах `area`, покрытие которой считается приемлемым для принятия расчетной метрики. Если при расчете метрик из стартового узла достижимо меньшее количество узлов, узел не рассматривается.  
+- **before_iters_start_function** (`callable`, optional):  
+  Функция выполняемая перед началом итеративного расчета. Сигнатура:  
+  ```python
+  before_iters_start_function(
+      best_metric: float,
+      dynamic_nodes: list|dict,
+      static_nodes: list|dict
+  )
+  ```  
+  Если не указана, ничего не происходит.  
+- **iter_calc_end_function** (`callable`, optional):  
+  Функция выполняемая в конце каждой итерации. Сигнатура такая же, как у `before_iters_start_function`. Если не указана, ничего не происходит.  
+- **stop_case_function** (`callable`, optional): Функция проверки, достигнута ли цель расчета  
+
+### Вызов
+
+```python
+best_dynamic_nodes, best_metric = BestNodesKoptG(...)(env, dynamic_nodes, static_nodes=None, area=None)
+```
+
+- **env** (`nx.Graph`): Граф улично-дорожной сети  
+- **dynamic_nodes** (`dict`): Список стартовых узлов, в которых размещены подразделения, оптимальные места которых следует определить  
+- **static_nodes** (`dict`, optional): Список стартовых узлов, размещение которых не меняется  
+- **area** (`pd.Series`, optional): Маска узлов — цели расчета леса Вороного. Если не указана, расчет производится для всех узлов графа  
+
+**Возвращает**  
+- `best_dynamic_nodes, best_metric` (`tuple[list|dict, float]`): Список или словарь лучших мест размещения и значение метрики для лучшего размещения  
+
+---
+
+## BestNodesGA
+
+Поиск лучших узлов для размещения n объектов.  
+Расчет производится генетическим алгоритмом.
+
+### Область применения
+
+- Определение размещения множества узлов в графе, при котором обеспечиваются наилучшие некоторые целевые метрики.  
+- Дает решение высокой точности.  
+- Хорошо подходит для больших графов.  
+
+### Конструктор
+
+```python
+BestNodesGA(
+    state_function: StateBase,
+    metric_function: MetricBase,
+    node_selector: PointSelectorBase,
+    population_size: int = 25,
+    epochs: int = 50,
+    mutation_rate: float = 0.5,
+    elite_size: int = 0,
+    appr_val_in_area: float = 0,
+    mutation_max_count: int | float = 1,
+    bad_val_in_area: int = 1000,
+    epoch_end_function: callable = None,
+    stop_case_function: callable = None,
+    **kwargs
+)
+```
+
+- **state_function** (`StateBase`): функция расчета состояния окружения  
+- **metric_function** (`MetricBase`): Функция расчета метрики  
+- **node_selector** (`PointSelectorBase`): Функция выбора узла  
+- **population_size** (`int`): Размер популяции  
+- **epochs** (`int`): Количество эпох расчета  
+- **mutation_rate** (`float`): Вероятность единичной мутации  
+- **elite_size** (`int`): Количество особей в элитной группе. Если 0, механизм элитизма не задействуется  
+- **appr_val_in_area** (`float`):  
+  Доля узлов графа в пределах `area`, покрытие которой считается приемлемым для принятия расчетной метрики.  
+- **mutation_max_count** (`int`):  
+  Максимальное количество единиц мутации. Если указано десятичное число (0–1), используется доля от общего числа подразделений  
+- **bad_val_in_area** (`int`):  
+  Значение для особи, если из неё нельзя достичь нужную долю узлов в `area`  
+- **epoch_end_function** (`callable`, optional): Функция, вызываемая после каждой эпохи расчета  
+- **stop_case_function** (`callable`, optional): Функция проверки, достигнута ли цель расчета  
+
+### Вызов
+
+```python
+best_dynamic_nodes, best_metric = BestNodesGA(...)(env, dynamic_nodes, static_nodes=None, area=None)
+```
+
+- **env** (`nx.Graph`): Граф улично-дорожной сети  
+- **dynamic_nodes** (`list|dict`): Список стартовых узлов, в которых размещены подразделения, оптимальные места которых следует определить  
+- **static_nodes** (`list|dict`, optional): Список стартовых узлов, размещение которых не меняется  
+- **area** (`pd.Series`, optional): Маска узлов — цели расчета леса Вороного  
+
+---
+
+## BestNodesSA
+
+Поиск лучших узлов для размещения n объектов.  
+Расчет производится алгоритмом имитации отжига.
+
+### Область применения
+
+- Определение размещения множества узлов в графе, при котором обеспечиваются наилучшие некоторые целевые метрики.  
+- Дает решение высокой точности.  
+- Хорошо подходит для больших графов.  
+
+### Конструктор
+
+```python
+BestNodesSA(
+    state_function: StateBase,
+    metric_function: MetricBase,
+    node_selector: PointSelectorBase,
+    initial_temperature: float = 1,
+    end_temperature: float = 0.0001,
+    turns: int = 1000000,
+    mutation_max_count: int = 1,
+    appr_val_in_area: float = 0,
+    bad_val_in_area: int | None = 1000,
+    turn_end_function: callable = None,
+    best_state_find_function: callable = None,
+    stop_case_function: callable = None,
+    **kwargs
+)
+```
+
+- **state_function** (`StateBase`): функция расчета состояния окружения  
+- **metric_function** (`MetricBase`): Функция расчета метрики  
+- **node_selector** (`PointSelectorBase`): Функция выбора узла  
+- **initial_temperature** (`float`): Начальная температура  
+- **end_temperature** (`float`): Температура при завершении  
+- **turns** (`int`): Количество итераций  
+- **mutation_max_count** (`int`):  
+  Максимальное количество единиц мутации. Если указано десятичное число (0–1), рассчитывается относительно числа подразделений  
+- **appr_val_in_area** (`float`):  
+  Доля узлов графа в пределах `area`, покрытие которой считается приемлемым для расчета метрики  
+- **bad_val_in_area** (`int|None`):  
+  Значение для узла, если из него нельзя достичь нужную долю узлов в `area`  
+- **turn_end_function** (`callable`, optional): Функция, вызываемая после каждой итерации  
+- **best_state_find_function** (`callable`, optional): Функция, вызываемая после определения лучшего размещения в рамках отжига  
+- **stop_case_function** (`callable`, optional): Функция проверки, достигнута ли цель расчета  
+
+### Вызов
+
+```python
+best_state, best_energy = BestNodesSA(...)(env, dynamic_nodes, static_nodes=None, area=None)
+```
+
+- **env** (`nx.Graph`): Граф улично-дорожной сети  
+- **dynamic_nodes** (`dict`): Список стартовых узлов, в которых размещены подразделения, оптимальные места которых следует определить  
+- **static_nodes** (`dict`, optional): Список стартовых узлов, размещение которых не меняется  
+- **area** (`pd.Series`, optional): Маска узлов — цели расчета леса Вороного  
+
+---
+
+## BestNodesGAKopt
+
+Поиск лучших узлов для размещения n объектов.  
+Расчет производится генетическим алгоритмом с последующим улучшением приспособленности каждой особи при помощи к-оптимизации (Kopt).
+
+### Область применения
+
+- Определение размещения множества узлов в графе, при котором обеспечиваются наилучшие некоторые целевые метрики.  
+- Дает решение высокой точности.  
+- Хорошо подходит для больших графов.  
+
+### Конструктор
+
+```python
+BestNodesGAKopt(
+    state_function: StateBase,
+    metric_function: MetricBase,
+    kopt_function: BestNodesKoptG,
+    node_selector: PointSelectorBase,
+    population_size: int = 25,
+    epochs: int = 50,
+    mutation_rate: float = 0.5,
+    elite_size: int = 0,
+    appr_val_in_area: float = 0,
+    mutation_max_count: int | float = 1,
+    bad_val_in_area: int = 1000,
+    epoch_end_function: callable = None,
+    stop_case_function: callable = None,
+    **kwargs
+)
+```
+
+- **state_function** (`StateBase`): функция расчета состояния окружения  
+- **metric_function** (`MetricBase`): Функция расчета метрики  
+- **population_size** (`int`): Размер популяции  
+- **epochs** (`int`): Количество эпох расчета  
+- **mutation_rate** (`float`): Вероятность единичной мутации  
+- **elite_size** (`int`): Количество особей в элитной группе. Если 0, механизм элитизма не задействуется  
+- **appr_val_in_area** (`float`):  
+  Доля узлов графа в пределах `area`, покрытие которой считается приемлемым для расчета метрики  
+- **mutation_max_count** (`int | float`):  
+  Максимальное количество единиц мутации. Если указано в диапазоне от 0 до 1, рассчитывается относительно размера популяции  
+- **bad_val_in_area** (`int`):  
+  Значение для узла, если из него нельзя достичь нужную долю узлов в `area`  
+- **epoch_end_function** (`callable`, optional): Функция, вызываемая после каждой эпохи расчета  
+- **stop_case_function** (`callable`, optional): Функция проверки, достигнута ли цель расчета  
+
+### Вызов
+
+```python
+best_dynamic_nodes, best_metric = BestNodesGAKopt(...)(env, dynamic_nodes, static_nodes=None, area=None)
+```
+
+- **env** (`nx.Graph`): Граф улично-дорожной сети  
+- **dynamic_nodes** (`list|dict`): Список стартовых узлов, в которых размещены подразделения, оптимальные места которых следует определить  
+- **static_nodes** (`list|dict`, optional): Список стартовых узлов, размещение которых не меняется  
+- **area** (`pd.Series`, optional): Маска узлов — цели расчета леса Вороного  

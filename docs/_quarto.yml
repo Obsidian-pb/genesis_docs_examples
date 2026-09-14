@@ -1,0 +1,96 @@
+project:
+  type: book
+  output-dir: documentation
+  preview:
+    port: 7502
+
+book:
+  title: "genesis docs"
+  description: |
+    Документация библиотеки genesis
+  version: 0.1.0
+  author: "Малютин О.С., Матеров Е.Н., Бабенышев С.В."
+  date: today
+  repo-url: https://github.com/Obsidian-pb/genesis
+  repo-actions: [edit]
+  downloads: [pdf, epub]
+  chapters:
+    # Вводная часть
+    - index.qmd
+    - pages/010_installation.qmd
+    - pages/020_rapid_start.ipynb
+
+    # Раздел Описание инструментов (osmnx, geopandas)
+    - part: 100_tools.qmd
+      chapters: 
+      - pages/110_what_is_osmnx.ipynb
+      - pages/120_what_is_geopandas.ipynb
+
+    # Раздел Подготовка данных
+    - part: 200_data_preparation.qmd
+      chapters: 
+      - pages/210_data_preparation.ipynb
+      - pages/220_data_preparation_qgis.ipynb
+
+    # Раздел Для пользователей
+    - part: 300_for_users.qmd
+      chapters: 
+      - pages/310_state_modelling.ipynb
+      - pages/320_analize.ipynb
+      - pages/330_blp.ipynb
+      - pages/340_mclp.ipynb
+      - pages/350_lscp.ipynb
+      - pages/360_lscp_package.ipynb
+      - pages/460_osmosis.qmd
+
+    # Раздел Для разработчиков
+    - part: 400_for_developers.qmd
+      chapters:
+      - pages/405_base_classes.qmd
+      - pages/410_state_modelling.ipynb
+      # - pages/320_analize.ipynb
+      - pages/430_blp.qmd
+      - pages/440_mclp.qmd
+      - pages/450_lscp.qmd
+      - pages/465_tools.qmd
+      - pages/470_custom_classes.ipynb
+      - pages/480_hybridization.ipynb
+
+    # Заключительный раздел
+    - pages/910_short.qmd
+    - pages/920_terms.qmd
+    - pages/930_useful_links.qmd
+    - pages/900_references.qmd
+
+    # Технический раздел
+    - 999_discussion.qmd
+
+lang: ru
+
+bibliography: references.bib
+
+format:
+  html:
+    # theme: cosmo
+    theme: 
+      - flatly
+    toc: true
+    toc-depth: 4
+    number-sections: true
+    number-depth: 2
+  # pdf:
+  #   documentclass: scrreprt
+  docx:
+    toc: true
+    toc-depth: 2
+    number-sections: true
+    number-depth: 2
+
+crossref:
+  fig-prefix: рис.      # (default is "Figure")
+  tbl-prefix: табл.     # (default is "Table")
+  title-delim: " -- "
+
+csl: gost-r-7-0-5-2008-numeric.csl
+
+

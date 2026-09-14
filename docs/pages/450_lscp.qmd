@@ -1,0 +1,224 @@
+# Задача определения количества подразделений при наилучшей дислокации (LSCP)
+
+В общем виде процесс решения задачи определения количества подразделений при наилучшей дислокации можно представить следующим образом:
+
+```{mermaid}
+flowchart LR
+
+  model("**МОДЕЛИРОВАНИЕ
+          ПАРАМЕТРОВ
+          ПРИБЫТИЯ**")
+  
+  result["**РЕЗУЛЬТАТЫ**"]
+
+  analyze("**АНАЛИЗ**
+        ---
+        Время прибытия
+        ---
+        Индекс прикрытия")
+
+  metrics["**МЕТРИКИ**"]
+
+  lscp_add["**LSCP**
+        ---
+        ADD"]
+
+  lscp_common["**LSCP**
+        ---
+        LSCP_Common"]
+
+  blp_algs["**ЭВРИСТИЧЕСКИЕ АЛГОРИТМЫ MCLP**
+        ---
+        GNS, GA, SAA, GA+GNS"]
+
+  blp("**ВЫБОР ДИСЛОКАЦИИ**")
+
+  aim["ЦЕЛЬ РАСЧЕТА"]
+
+
+  model --> result
+  metrics --> analyze
+  result --> analyze
+  blp_algs --> lscp_common
+  lscp_common --> blp
+  lscp_add --> blp
+  analyze --> blp
+  aim --> blp
+  blp --> model
+
+```
+
+Решение задачи определения количества подразделений при наилучшей дислокации в **Генезис** осуществляется на основании двух подходов:
+
+1. Решение за одну итерацию (единым алгоритмом)
+2. Решение в несколько итераций решения задачи MCLP - на каждой итерации решается задача MCLP, после чего проверяется достигнута ли цель расчета. Если цель не достигнута, добавляется новая ПСЧ и выполняется следующая итерация MCLP.
+
+
+В **Генезис** реализованы следующие алгоритмы решения задачи LSCP:
+
+- Рекомендуемый:
+  - `genesis.lscp.LSCP_ADD` -- Алгоритм жадного добавления (ADD) - *рекомендуемый*, реализующий первый подход
+- Прочие:
+  - `genesis.lscp.LSCP_Common` -- Общий модульный алгоритм, реализующий второй подход. 
+
+
+
+## LSCPCommon
+
+Наиболее общий модульный алгоритм расчета количества и оптимального размещения узлов для достижения целевой метрики.
+
+Наследуется от [LSCPBase](405_base_classes.qmd#lscpbase).
+
+### Область применения
+
+Определение размещения требуемого количества подразделений пожарной охраны
+исходя из цели расчета. 
+
+### Конструктор
+
+```python
+LSCPCommon(
+    state_function,
+    metric_function,
+    **kwargs
+)
+```
+
+- `mclp_function`: [MCLPBase](405_base_classes.qmd#mclpbase)
+    функция решения задачи MCLP
+- `point_selector`: [PointSelectorBase](405_base_classes.qmd#pointselectorbase)
+    функция выбора узла
+- `stop_case_function`: [StopCaseBase](405_base_classes.qmd#stopcasebase)
+    функция проверки достигнутой цели расчета
+- `metric_function`: [MetricBase](405_base_classes.qmd#metricbase)
+    Функция расчета метрики
+- `names_pattern`: `str` = `'{}'`
+    Шаблон имен подразделений. Например, `'пч-{}'`.
+- `start_names_index`: `int` = `1`
+    Стартовый номер подразделений.
+- `after_mclp_function`: `callable` = `None`
+    функция выполняемая после выполнения каждой итерации алгоритма.
+    Сигнатура функции:
+    ```python
+    after_mclp_function(iteration,
+                    best_metric,
+                    current_metric,
+                    dynamic_nodes,
+                    static_nodes)
+    ```
+
+
+### Вызов
+
+```python
+best_dynamic_nodes, current_metric = LSCPCommon(...)(env, dynamic_nodes, static_nodes=None, area=None, nodes_list=None)
+```
+
+- `env` (`nx.Graph`): Граф улично-дорожной сети  
+- `dynamic_nodes` (`list|dict`): Список стартовых узлов графа, в которых размещены подразделения, оптимальные места которых следует определить  
+- `static_nodes` (`list|dict`, optional): Список стартовых узлов графа, в которых размещены подразделения, размещение которых не следует изменять  
+- `area` (`pd.Series`, optional): Маска узлов графа — цели расчета леса Вороного. Если не указана, расчёт производится для всех узлов графа  
+- `nodes_list` (`set`, optional): Множество узлов графа, которые будут рассмотрены в качестве кандидатов. Если не указано, рассматриваются все узлы графа  
+
+---
+
+## LSCP_ADD
+
+Решение задачи LSCP алгоритмом жадного добавления.  
+Наследуется от [LSCPBase](405_base_classes.qmd#lscpbase).
+
+### Область применения
+
+Определение размещения требуемого количества подразделений пожарной охраны
+исходя из цели расчета. 
+
+### Конструктор
+
+```python
+LSCP_ADD(
+    state_function,
+    matrix,
+    metric_function,
+    ip_val=10,
+    mclp_function=None,
+    point_selector=None,
+    stop_case_function=None,
+    names_pattern='{}',
+    start_names_index=1,
+    after_mclp_function=None,
+    **kwargs
+)
+```
+
+- `state_function`: [StateBase](405_base_classes.qmd#statebase)  
+    Функция расчета состояния узла.  
+- `matrix`: `pd.DataFrame`  
+    Матрица времен прибытия, отражающая время прибытия к каждому из объектов из каждого из узлов.  
+- `metric_function`: [MetricBase](405_base_classes.qmd#metricbase)  
+    Функция расчета метрики оптимальности размещения подразделений.  
+- `ip_val`: `int`  
+    Пороговое значение для определения индекса прикрытия.  
+    Рекомендуется использовать 10 для городских населенных пунктов и 20 для сельских.  
+- `mclp_function`: [MCLPBase](405_base_classes.qmd#mclpbase) = `None`  
+    Реализация алгоритма решения задачи MCLP.  
+- `point_selector`: [PointSelectorBase](405_base_classes.qmd#pointselectorbase) = `None`  
+    Реализация алгоритма выбора узлов.  
+- `stop_case_function`: [StopCaseBase](405_base_classes.qmd#stopcasebase) = `None`  
+    Функция условия остановки. Если не указана, расчёт производится до тех пор, пока не будут удалены все строки в `matrix`.  
+- `names_pattern`: `str` = `'{}'`  
+    Шаблон имен подразделений. Например, `'пч-{}'`.  
+- `start_names_index`: `int` = `1`  
+    Стартовый номер подразделений.  
+- `after_mclp_function`: `callable` = `None`  
+    Функция, выполняемая после выполнения каждой итерации алгоритма.  
+    Сигнатура функции:  
+    ```python
+    after_mclp_function(
+        iteration,
+        best_metric,
+        current_metric,
+        dynamic_nodes,
+        static_nodes
+    )
+    ```
+
+### Вызов
+
+```python
+best_dynamic_nodes, best_metric = LSCP_ADD(...)(env=None, dynamic_nodes=None, static_nodes=None, area=None, nodes_list=None)
+```
+
+- `env` (`nx.Graph`, optional): Граф улично-дорожной сети  
+- `dynamic_nodes` (`list|dict`, optional): Список стартовых узлов графа, в которых размещены подразделения, оптимальные места которых следует определить  
+- `static_nodes` (`list|dict`, optional): Список стартовых узлов графа, в которых размещены подразделения, размещение которых не следует изменять  
+- `area` (`pd.Series`, optional): Маска узлов графа — цели расчета леса Вороного. Если не указана, расчёт производится для всех узлов графа  
+- `nodes_list` (`set`, optional): Множество узлов графа, которые будут рассмотрены в качестве кандидатов. Если не указано, рассматриваются все узлы графа  
+
+**Возвращает**  
+- `best_dynamic_nodes, best_metric`:  
+  Словарь лучших размещений (`{узел: имя}`) и лучшая метрика.
+
+---
+
+## drop_trash_points
+
+Удаление узлов, которые не могут быть достигнуты из других узлов.
+
+```python
+drop_trash_points(env,
+    state_function: StateBase,
+    metric_function: MetricBase,
+    stop_case_function: StopCaseBase,
+    dynamic_nodes,
+    static_nodes=None,
+    area=None,
+    ):
+```
+
+- `env`: `nx.Graph`
+- `state_function`: [StateBase](405_base_classes.qmd#statebase)
+- `metric_function`: [MetricBase](405_base_classes.qmd#metricbase)
+- `stop_case_function`: [StopCaseBase](405_base_classes.qmd#stopcasebase)
+- `dynamic_nodes` (`list|dict`, optional): Список стартовых узлов графа, в которых размещены подразделения, оптимальные места которых следует определить  
+- `static_nodes` (`list|dict`, optional): Список стартовых узлов графа, в которых размещены подразделения, размещение которых не следует изменять  
+- `area` (`pd.Series`, optional): Маска узлов графа — цели расчета леса Вороного. Если не указана, расчёт производится для всех узлов графа  
